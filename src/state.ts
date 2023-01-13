@@ -106,8 +106,8 @@ export class GameState {
             }
         });
         // set players turn
-        this.activePlayer = (this.round + this.startingPlayer) % this.nPlayers;
-        this.previousPlayer = (this.round + this.startingPlayer - 1) % this.nPlayers;
+        // this.activePlayer = (this.round + this.startingPlayer) % this.nPlayers;
+        // this.previousPlayer = (this.round + this.startingPlayer - 1) % this.nPlayers;
         this.firstTile = Tile.FirstPlayer;
         this.playedMoves = [];
         // generate move list
@@ -158,6 +158,10 @@ export class GameState {
     endRound(): boolean {
         // move tiles to wall and back to bag, count up scores
         this.playerBoards.forEach((pb, i) => {
+            // Check who goes first next round
+            if (pb.floor[0] == Tile.FirstPlayer) {
+                this.activePlayer = i;
+            }
             // move tiles and get score
             pb.score += this.moveToWall(i, pb.wall);
             // move leftover tiles from lines back to bag
