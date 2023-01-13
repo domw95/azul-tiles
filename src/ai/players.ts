@@ -1,5 +1,6 @@
 import * as minimax from "minimaxer";
-import { GameState, Move, PlayerInterface, PlayerType } from "../azul.js";
+import { Move, PlayerInterface, PlayerType } from "../azul.js";
+import { GameState } from "../state.js";
 import { getMovesCallback } from "./ai.js";
 import { evalGamestateCallback } from "./evaluation.js";
 import { createChildCallback } from "./move_play.js";
@@ -51,18 +52,20 @@ enum NegamaxAIMode {
 
 // Options for creating a Negamax player
 export class NegamaxAIOpts extends minimax.NegamaxOpts {
+    /** If `true`, the tree is saved between moves and the root moved */
     traverse = false;
-    // print to console
-    print = false;
-
+    /** If `true` prints lots of interesting info to console */
+    print = true;
+    /** Search mode to use */
+    mode: NegamaxAIMode = NegamaxAIMode.TIME;
     // supply underlying tree opts to constructor
-    constructor(public mode: NegamaxAIMode) {
+    constructor() {
         super();
     }
 }
 
 /** Class that implements the negamax AI player */
-export class NegaxmaxAI extends AI {
+export class NegamaxAI extends AI {
     /** Hold the current game tree */
     tree: minimax.Negamax<GameState, Move> | undefined;
 
@@ -85,16 +88,41 @@ export class NegaxmaxAI extends AI {
             console.log(" ====== Player %d turn ======", this.id);
         }
         // Create a tree
+        let aim = minimax.NodeAim.MAX;
+        if (this.id == 1) {
+            aim = minimax.NodeAim.MIN;
+        }
         const tree = new minimax.Negamax(
             gamestate,
-            minimax.NodeAim.MAX,
+            aim,
             getMovesCallback,
             createChildCallback,
             evalGamestateCallback,
             this.opts,
         );
-        // Search for move
-        const result = tree.evalTime(100);
+
+        if (this.opts.print) {
+            tree.depthCallback = (
+                tree: minimax.Negamax<GameState, Move>,
+                result: minimax.NegamaxResult<Move>,
+            ): void => {
+                printResult(result);
+            };
+        }
+
+        // Get the result
+        let result: minimax.NegamaxResult<Move>;
+        switch (this.opts.mode) {
+            case NegamaxAIMode.DEPTH:
+                result = tree.evalDepth();
+                break;
+            case NegamaxAIMode.DEEPENING:
+                result = tree.evalDeepening();
+                break;
+            case NegamaxAIMode.TIME:
+                result = tree.evalTime();
+                break;
+        }
         if (this.opts.print) {
             printResult(result);
         }

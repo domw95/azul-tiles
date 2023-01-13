@@ -2,9 +2,7 @@
 // rexport subfiles from here
 
 import { GameState } from "./state.js";
-
-export * from "./game.js";
-export * from "./state.js";
+import { PlayerBoard } from "./playerboard.js";
 
 /** All the types of tiles availabe in the game */
 export enum Tile {
@@ -21,7 +19,12 @@ export enum Tile {
 
 /** A move that can be performed in the game */
 export class Move {
-    constructor(public player: number, public factory: number, public tile: Tile, public line: number) {}
+    constructor(
+        public player: number,
+        public factory: number,
+        public tile: Tile,
+        public line: number,
+    ) {}
 }
 
 export enum PlayerType {
@@ -48,31 +51,3 @@ export interface PlayerInterface {
      */
     newRound(gs: GameState): void;
 }
-
-// function printGame(gs:GameState): void {
-//     console.log("\nGame Board\n")
-//     console.log("Factories")
-//     gs.factory.forEach((factory,i) => {
-//         console.log("Factory %d",i)
-//         console.log(factory)
-//     });
-//     console.log();
-//     gs.playerBoards.forEach((pb,i) => {
-//         console.log("\tPlayer %d",i)
-//         console.log("Lines")
-//         pb.lines.forEach(line => {
-//             console.log(line)
-//         });
-//         console.log("Wall")
-//         pb.wall.forEach(w => {
-//             console.log(w)
-//         });
-//         console.log("Floor")
-//         console.log(pb.floor)
-//         console.log()
-//     });
-//     console.log("Wall Positions")
-//     PlayerBoard.wallTypes.forEach(line =>{
-//         console.log(line)
-//     })
-// }
