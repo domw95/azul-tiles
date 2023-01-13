@@ -235,11 +235,15 @@ export class GameState {
                         // check if possible move tile matches current line
                         if (line.length < lineNumber + 1 && line[0] == tile) {
                             // is a valid move, add to list
-                            this.availableMoves.push(new Move(this.activePlayer, factoryid, tile, lineNumber));
+                            this.availableMoves.push(
+                                new Move(this.activePlayer, factoryid, tile, lineNumber),
+                            );
                         }
                     } else {
                         // No tiles in line, valid move
-                        this.availableMoves.push(new Move(this.activePlayer, factoryid, tile, lineNumber));
+                        this.availableMoves.push(
+                            new Move(this.activePlayer, factoryid, tile, lineNumber),
+                        );
                     }
                 });
                 // also add a move straight to the floor
@@ -459,7 +463,8 @@ export class GameState {
     evalScore(player: number): number {
         // create new wall to apply changes to
         const wall = this.playerBoards[player].wall.map((line) => line.slice(0));
-        const score = this.moveToWall(player, wall) + this.playerBoards[player].score + this.wallScore(wall);
+        const score =
+            this.moveToWall(player, wall) + this.playerBoards[player].score + this.wallScore(wall);
         if (score > 0) {
             return score;
         } else {

@@ -1,6 +1,6 @@
 {
     "name": "azul-tiles",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Implements the board game Azul",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -11,7 +11,7 @@
         "buildExamples": "rm -rf examples/*js && npx tsc -p examples/",
         "buildBenchmarks": "rm -rf benchmarks/*js && npx tsc -p benchmarks/",
         "docs": "typedoc",
-        "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+        "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint .",
         "prepare": "npm run build",
         "prepublishOnly": "exit 0",
