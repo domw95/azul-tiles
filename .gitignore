@@ -1,0 +1,6 @@
+node_modules
+/dist
+/benchmarks/**/*.js
+/benchmarks/**/*.d.ts
+/examples/**/*.js
+/examples/**/*.d.ts

@@ -1,0 +1,9 @@
+{
+    "entryPoints": ["src/index.ts"],
+    "entryPointStrategy": "expand",
+    "out": "docs",
+//     "plugin": ["typedoc-theme-hierarchy"],
+//     "theme": "hierarchy"
+    // "plugin": ["typedoc-neo-theme"],
+    // "theme": "./node_modules/typedoc-neo-theme/bin/default",
+}
