@@ -45,7 +45,7 @@ function printResult(result: minimax.NegamaxResult<Move>): void {
 // pruning none/ab
 // deepening/time pruning postsort
 
-enum NegamaxAIMode {
+export enum NegamaxAIMode {
     DEPTH,
     TIME,
     DEEPENING,
