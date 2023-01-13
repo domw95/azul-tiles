@@ -48,6 +48,7 @@
     },
     "homepage": "https://github.com/domw95/azul-tiles#readme",
     "dependencies": {
+        "minimaxer": "^1.0.0",
         "seedrandom": "^3.0.5"
     }
 }
