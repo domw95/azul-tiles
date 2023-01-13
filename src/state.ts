@@ -1,53 +1,65 @@
-// All the classes for gamestate management
-
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
 import { PlayerBoard } from "./playerboard.js";
 
-//
+/** Tracks state of the game */
 export enum State {
+    /** Set when {@link GameState} is constructed */
     start,
+    /** Ready to accept a move from a player */
     turn,
+    /** Player has just played a move */
     turnEnd,
+    /** No more turns can be played this round */
     endOfTurns,
+    /** Tiles have been moved and scores have been calculated for round */
     roundEnd,
+    /** Game finished, with final scores and winner available */
     gameEnd,
 }
 
-/** Full representation of the  azul game */
+/** Full representation of the azul game */
 export class GameState {
+    /** Holds all the tiles which are dealt to factories */
     tilebag: Array<Tile> = [];
+    /** Array of factories to hold tiles. Factory[0] is centre */
     factory: Array<Array<Tile>> = [];
+    /** If equal to  {@link azul.Tile.FirstPlayer}, first player tile is in centre*/
     firstTile: Tile = Tile.FirstPlayer;
+    /** Array that holds the players board state */
     playerBoards: Array<PlayerBoard> = [];
-
+    /** List of moves available to current player */
     availableMoves: Array<Move> = [];
+    /** List of moves played in this round */
     playedMoves: Array<Move> = [];
-
+    /** Number of players in the game */
     nPlayers = 0;
+
     round = 0;
     turn = 0;
     activePlayer = 0;
     startingPlayer = 0;
     previousPlayer = 0;
-
+    /** Index of winning player/s. */
     winner: Array<number> = [];
 
     state: State = State.start;
 
-    seed: string = Math.random().toString();
+    /** Used to generate a random game */
     rng: seedrandom.PRNG = seedrandom();
 
-    constructor(seed?: string) {
-        if (typeof seed !== "undefined") {
-            this.seed = seed;
-        }
-    }
+    /**
+     *
+     * @param seed Seed the random number generator to play a specific game. Random otherwise
+     */
+    constructor(public seed: string = Math.random().toString()) {}
 
-    // Starts a new game, new round, ready for first turn
+    /**
+     * Starts a new game, new round, ready for first turn
+     * @param nPlayers Number of players to play game with
+     */
     newGame(nPlayers: number): void {
         // Create rng
-
         this.rng = seedrandom(this.seed);
         // Create player boards
         this.nPlayers = nPlayers;
@@ -60,14 +72,20 @@ export class GameState {
         for (let i = 0; i < 100; i++) {
             this.tilebag.push(i % 5);
         }
-        // create correct number of tiles
+        // create factories
         this.createFactories();
         // setup for new round and set round number to 0
         this.round = -1;
         this.newRound();
     }
 
-    newRound(): void {
+    /**
+     * Picks random tiles from bag and places in factories
+     * Updates state (player turns etc)
+     * Gets moves for first turn
+     * Returns with state {@link state.State.turn}
+     */
+    private newRound(): void {
         // increment round number
         this.round++;
 
@@ -96,10 +114,16 @@ export class GameState {
         this.getMoves();
         // set turn number
         this.turn = 0;
-        // set state fr first turn
+        // set state for first turn
         this.state = State.turn;
     }
 
+    /**
+     * Function to be called after a player has played a move
+     * Either goes to {@link state.State.turn} state or {@link state.State.endOfTurns} if no moves left
+     * Generates list of moves for next turn
+     * @returns `true` if another turn is available, `false` if end of turns
+     */
     nextTurn(): boolean {
         if (this.state != State.turnEnd) {
             throw Error("Not end of turn");
@@ -126,9 +150,11 @@ export class GameState {
         }
     }
 
-    // Moves tiles to wall
-    // Adds up scores
-    // checks for game end condition
+    /**
+     * Function to be called when in {@link state.State.endOfTurns} state
+     * Moves tiles, calculates score and checks for game end condition
+     * @returns `true` if another round is about to start, `false` if end of game
+     */
     endRound(): boolean {
         // move tiles to wall and back to bag, count up scores
         this.playerBoards.forEach((pb, i) => {
@@ -188,7 +214,9 @@ export class GameState {
         }
     }
 
-    // populates avaialableMoves with all possible moves in current  state
+    /**
+     * Populates the {@link GameState.availableMoves} list with all possible moves for this player
+     */
     getMoves(): void {
         // Clear list of possible moves
         this.availableMoves = [];
@@ -225,6 +253,11 @@ export class GameState {
         }
     }
 
+    /**
+     *  Moves selected tiles from factory to players line and/or floor.
+     *  Spare tiles may go to centre factory.
+     * @param move Valid move from {@link GameState.availableMoves} that is applied to the game
+     */
     playMove(move: Move): void {
         if (this.state != State.turn || this.activePlayer != move.player) {
             throw Error("Invalid state for this move");
@@ -271,8 +304,10 @@ export class GameState {
         this.state = State.turnEnd;
     }
 
-    // create the correct number of factories for game
-    createFactories(): void {
+    /**
+     * Create factories according to number of players in game
+     */
+    private createFactories(): void {
         let n = 0;
         if (this.nPlayers == 2) {
             n = 5;
@@ -287,6 +322,13 @@ export class GameState {
         }
     }
 
+    /**
+     * Places tiles in the wall correspnding to full line in the `player`'s board and calulcates score.
+     * Does not remove tiles from the lines
+     * @param player player whose board the line tiles should be 'taken' from
+     * @param wall Wall that the tiles are to be placed in
+     * @returns The score for moving these tiles only
+     */
     moveToWall(player: number, wall: Array<Array<Tile>>): number {
         // if a line is full, puts a tile in the wall.
         // does not remove tiles from lines
@@ -359,7 +401,11 @@ export class GameState {
         return score;
     }
 
-    // calculates the row, column and colour score for a given wall
+    /**
+     *
+     * @param wall Wall to calculate score of
+     * @returns The total score from row, columns and colours
+     */
     wallScore(wall: Array<Array<Tile>>): number {
         let score = 0;
         // row scores
@@ -404,7 +450,12 @@ export class GameState {
         });
         return score;
     }
-    // calculate the score change for current wall state
+
+    /**
+     *
+     * @param player Player to evaluate score of
+     * @returns The total score the player would have if the round ended now
+     */
     evalScore(player: number): number {
         // create new wall to apply changes to
         const wall = this.playerBoards[player].wall.map((line) => line.slice(0));
@@ -416,6 +467,10 @@ export class GameState {
         }
     }
 
+    /**
+     * Fast cloning of gamestate
+     * @returns Clone of this GameState
+     */
     clone(): GameState {
         const gs = new GameState();
         gs.nPlayers = this.nPlayers;
@@ -436,6 +491,12 @@ export class GameState {
         return gs;
     }
 
+    /**
+     * Tries to only clone objects that are going to change due to the move being played
+     * Should use less memory than clone
+     * @param move Move that is to be played for clone
+     * @returns Clone of the current gamestate
+     */
     smart_clone(move: Move): GameState {
         const gs = new GameState();
 
