@@ -1,35 +1,36 @@
 {
-  "name": "azul-tiles",
-  "version": "1.0.0",
-  "description": "Implements the board game Azul",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-"type": "module",
-  "scripts": {
-    "test": "jest",
-"build": "tsc",
-"buildExamples": "rm -rf examples/*js && npx tsc -p examples/",
-"buildBenchmarks": "rm -rf benchmarks/*js && npx tsc -p benchmarks/",
-"docs": "typedoc",
-"format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
-"lint": "eslint .",
-"prepare": "npm run build",
-"prepublishOnly": "exit 0",
-"preversion": "npm run lint",
-"version": "npm run format && git add -A src",
-"postversion": "git push && git push --tags"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/domw95/azul-tiles.git"
-  },
-  "keywords": [
-    "azul",
-    "game",
-    "ai"
-  ],
-  "devDependencies": {
+    "name": "azul-tiles",
+    "version": "1.0.0",
+    "description": "Implements the board game Azul",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "type": "module",
+    "scripts": {
+        "test": "jest",
+        "build": "tsc",
+        "buildExamples": "rm -rf examples/*js && npx tsc -p examples/",
+        "buildBenchmarks": "rm -rf benchmarks/*js && npx tsc -p benchmarks/",
+        "docs": "typedoc",
+        "format": "prettier --write \"src/**/*.ts\" \"src/**/*.js\"",
+        "lint": "eslint .",
+        "prepare": "npm run build",
+        "prepublishOnly": "exit 0",
+        "preversion": "npm run lint",
+        "version": "npm run format && git add -A src",
+        "postversion": "git push && git push --tags"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/domw95/azul-tiles.git"
+    },
+    "keywords": [
+        "azul",
+        "game",
+        "ai"
+    ],
+    "devDependencies": {
         "@types/jest": "^29.2.5",
+        "@types/seedrandom": "^3.0.4",
         "@typescript-eslint/eslint-plugin": "^5.48.1",
         "@typescript-eslint/parser": "^5.48.1",
         "benny": "^3.7.1",
@@ -40,10 +41,13 @@
         "typedoc": "^0.23.24",
         "typescript": "^4.9.4"
     },
-  "author": "domw95",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/domw95/azul-tiles/issues"
-  },
-  "homepage": "https://github.com/domw95/azul-tiles#readme"
+    "author": "domw95",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/domw95/azul-tiles/issues"
+    },
+    "homepage": "https://github.com/domw95/azul-tiles#readme",
+    "dependencies": {
+        "seedrandom": "^3.0.5"
+    }
 }
