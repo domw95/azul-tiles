@@ -27,9 +27,13 @@ for (let i = 0; ; i++) {
     if (move != undefined) {
         game.playMove(move);
         if (!game.nextTurn()) {
-            console.log("end of round");
+            console.log();
+            console.log("=========== End of round ==========");
+            console.log();
             if (!game.endRound()) {
-                console.log("end of game");
+                console.log();
+                console.log("========== End of game ===========");
+                console.log();
                 break;
             }
         }
