@@ -11,6 +11,7 @@ export class AI implements PlayerInterface {
     gamestate?: GameState;
     name = "";
     constructor(public id: number) {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     getMove(gs: GameState): Move | undefined {
         return undefined;
     }

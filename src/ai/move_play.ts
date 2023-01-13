@@ -1,7 +1,7 @@
 // Different functions to play a move for the game tree
 import * as minimax from "minimaxer";
 import { Move } from "../azul.js";
-import { GameState, State } from "../state.js";
+import { GameState } from "../state.js";
 
 /**
  * Simple callback to create a new child

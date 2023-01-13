@@ -37,10 +37,12 @@ export class Game {
             player.newRound(this.gamestate);
         });
         // run through game
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             // get the move from active player
             const move = this.players[this.gamestate.activePlayer].getMove(this.gamestate);
             // play the move
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             this.gamestate.playMove(move!);
             // go to next turn
             if (!this.gamestate.nextTurn()) {
@@ -59,7 +61,11 @@ export class Game {
                         }
                     }
 
-                    return new GameResult(scores, winner, this.players[this.gamestate.activePlayer]);
+                    return new GameResult(
+                        scores,
+                        winner,
+                        this.players[this.gamestate.activePlayer],
+                    );
                 }
                 // update players with new round
                 this.players.forEach((player) => {
