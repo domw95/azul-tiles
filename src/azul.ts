@@ -2,7 +2,6 @@
 // rexport subfiles from here
 
 import { GameState } from "./state.js";
-import { PlayerBoard } from "./playerboard.js";
 
 /** All the types of tiles availabe in the game */
 export enum Tile {
