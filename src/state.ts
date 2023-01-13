@@ -1,5 +1,3 @@
-// All the classes for gamestate management
-
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
 import { PlayerBoard } from "./playerboard.js";

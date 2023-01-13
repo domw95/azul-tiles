@@ -1,25 +1,8 @@
 // Selection of functions and classes for automatically running a game
 // synchrously, not with gui (cli or automated)
 
-import { GameState, Move, State } from "./state.js";
-
-// Flag whether player is AI or HUMAN
-export enum PlayerType {
-    HUMAN,
-    AI,
-}
-
-// Standard interface for all players
-export interface PlayerInterface {
-    type: PlayerType;
-    id: number;
-    name: string;
-    // called when move is required from player
-    // returns undefined if player is async
-    getMove(gs: GameState): Move | undefined;
-    // Function called when end of round for player to setup
-    newRound(gs: GameState): void;
-}
+import { PlayerInterface } from "./azul.js";
+import { GameState, State } from "./state.js";
 
 // The result from a single game
 export class GameResult {
