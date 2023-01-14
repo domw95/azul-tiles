@@ -257,11 +257,6 @@ export class GameState {
                 this.availableMoves.push(new Move(this.activePlayer, factoryid, tile, 5));
             });
         });
-
-        // Add firstplayer tile straight to floor
-        if (this.firstTile == Tile.FirstPlayer) {
-            this.availableMoves.push(new Move(this.activePlayer, 0, Tile.FirstPlayer, 5));
-        }
     }
 
     /**
