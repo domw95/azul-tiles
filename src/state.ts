@@ -537,7 +537,7 @@ export class GameState {
         gs.activePlayer = this.activePlayer;
         gs.startingPlayer = this.startingPlayer;
         gs.previousPlayer = this.previousPlayer;
-        // gs.state = this.state;
+        gs.state = this.state;
         // gs.seed = this.seed;
         return gs;
     }
