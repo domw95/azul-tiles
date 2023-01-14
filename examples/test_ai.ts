@@ -1,24 +1,22 @@
-import { GameState, printGame } from "../dist/index.js";
-import { NegamaxAI, NegamaxAIOpts } from "../dist/ai/players.js";
-import { PruningType } from "minimaxer";
+import { AI, GameState, AIOpts, PruningType } from "../dist/index.js";
 
 // Create a game
 const game = new GameState();
 game.newGame(2);
 
-const opts0 = new NegamaxAIOpts();
+const opts0 = new AIOpts();
 opts0.timeout = 100;
 // opts0.pruning = PruningType.ALPHA_BETA;
 // opts0.presort = true;
 // opts0.genBased = true;
-const player0 = new NegamaxAI(0, opts0);
+const player0 = new AI(0, opts0);
 
-const opts1 = new NegamaxAIOpts();
+const opts1 = new AIOpts();
 opts1.timeout = 100;
 opts1.pruning = PruningType.ALPHA_BETA;
 opts1.presort = true;
 opts1.genBased = true;
-const player1 = new NegamaxAI(1, opts1);
+const player1 = new AI(1, opts1);
 const players = [player0, player1];
 
 for (let i = 0; ; i++) {

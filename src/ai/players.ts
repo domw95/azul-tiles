@@ -2,23 +2,8 @@ import * as minimax from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
 import { GameState } from "../state.js";
 import { getMovesCallback } from "./ai.js";
-import { evalGamestateCallback } from "./evaluation.js";
-import { createChildCallback } from "./move_play.js";
-
-// Class to implement
-export class AI implements PlayerInterface {
-    type = PlayerType.AI;
-    gamestate?: GameState;
-    name = "";
-    constructor(public id: number) {}
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    getMove(gs: GameState): Move | undefined {
-        return undefined;
-    }
-    newRound(gamestate: GameState): void {
-        this.gamestate = gamestate;
-    }
-}
+import { evalGamestateCallback, evalGamestateCentre, evalValueQuick } from "./evaluation.js";
+import { createChildCallback, createChildSmartClone } from "./move_play.js";
 
 function printResult(result: minimax.NegamaxResult<Move>): void {
     if (result.exit == minimax.SearchExit.TIME) {
@@ -38,27 +23,36 @@ function printResult(result: minimax.NegamaxResult<Move>): void {
     );
 }
 
-// type of AI possible:
-// Depth
-// Time
-// Deepening
-// pruning none/ab
-// deepening/time pruning postsort
-
-export enum NegamaxAIMode {
+export enum AIMode {
     DEPTH,
     TIME,
     DEEPENING,
 }
 
+export const enum CloneMethod {
+    STANDARD,
+    SMART,
+}
+
+export const enum EvalMethod {
+    STANDARD,
+    CENTRE,
+}
+
 // Options for creating a Negamax player
-export class NegamaxAIOpts extends minimax.NegamaxOpts {
+export class AIOpts extends minimax.NegamaxOpts {
     /** If `true`, the tree is saved between moves and the root moved */
     traverse = false;
     /** If `true` prints lots of interesting info to console */
-    print = true;
+    print = false;
     /** Search mode to use */
-    mode: NegamaxAIMode = NegamaxAIMode.TIME;
+    mode = AIMode.TIME;
+    /** Game state clone method to use */
+    clone: CloneMethod = CloneMethod.STANDARD;
+    /** How the gamestate should be evaluated */
+    eval: EvalMethod = EvalMethod.STANDARD;
+    /** Whether to use the quick evaluation version of the function */
+    evalQuick = false;
     // supply underlying tree opts to constructor
     constructor() {
         super();
@@ -66,7 +60,10 @@ export class NegamaxAIOpts extends minimax.NegamaxOpts {
 }
 
 /** Class that implements the negamax AI player */
-export class NegamaxAI extends AI {
+export class AI implements PlayerInterface {
+    type = PlayerType.AI;
+    name = "";
+
     /** Hold the current game tree */
     tree: minimax.Negamax<GameState, Move> | undefined;
 
@@ -75,9 +72,7 @@ export class NegamaxAI extends AI {
      * @param id Player index, must correspond with gamestate index
      * @param opts Configuration options
      */
-    constructor(id: number, public opts: NegamaxAIOpts) {
-        super(id);
-    }
+    constructor(public id: number, public opts: AIOpts) {}
 
     /**
      *  Function called when game requires the AI to picka  move
@@ -93,12 +88,22 @@ export class NegamaxAI extends AI {
         if (this.id == 1) {
             aim = minimax.NodeAim.MIN;
         }
+        let childCallback = createChildCallback;
+        if (this.opts.clone == CloneMethod.SMART) {
+            childCallback = createChildSmartClone;
+        }
+        let evalCallback = evalGamestateCallback;
+        if (this.opts.eval == EvalMethod.CENTRE) {
+            evalCallback = evalGamestateCentre;
+        } else if (this.opts.evalQuick) {
+            evalCallback = evalValueQuick;
+        }
         const tree = new minimax.Negamax(
             gamestate,
             aim,
             getMovesCallback,
-            createChildCallback,
-            evalGamestateCallback,
+            childCallback,
+            evalCallback,
             this.opts,
         );
 
@@ -107,6 +112,7 @@ export class NegamaxAI extends AI {
                 tree: minimax.Negamax<GameState, Move>,
                 result: minimax.NegamaxResult<Move>,
             ): void => {
+                console.log("depth");
                 printResult(result);
             };
         }
@@ -114,13 +120,13 @@ export class NegamaxAI extends AI {
         // Get the result
         let result: minimax.NegamaxResult<Move>;
         switch (this.opts.mode) {
-            case NegamaxAIMode.DEPTH:
+            case AIMode.DEPTH:
                 result = tree.evalDepth();
                 break;
-            case NegamaxAIMode.DEEPENING:
+            case AIMode.DEEPENING:
                 result = tree.evalDeepening();
                 break;
-            case NegamaxAIMode.TIME:
+            case AIMode.TIME:
                 result = tree.evalTime();
                 break;
         }
@@ -130,4 +136,7 @@ export class NegamaxAI extends AI {
         // Return move
         return result.move;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    newRound(gs: GameState): void {}
 }

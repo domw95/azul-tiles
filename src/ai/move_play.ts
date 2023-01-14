@@ -21,6 +21,20 @@ export const createChildCallback: minimax.CreateChildNodeFunc<GameState, Move> =
     }
 };
 
+export const createChildSmartClone: minimax.CreateChildNodeFunc<GameState, Move> = (
+    gamestate: GameState,
+    move: Move,
+): minimax.Node<GameState, Move> => {
+    // Clone gamestate and play move
+    const child = gamestate.smartClone(move);
+    child.playMove(move);
+    if (!child.nextTurn()) {
+        return new minimax.Node(minimax.NodeType.LEAF, child, move);
+    } else {
+        return new minimax.Node(minimax.NodeType.INNER, child, move);
+    }
+};
+
 // Clone gamestate from node, create new node with gamestate
 // mark new node if LEAF
 // export function movePlay(node: minimax.Node, branch: TreeBranch): minimax.Node {

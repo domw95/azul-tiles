@@ -116,6 +116,9 @@ export class GameState {
         this.turn = 0;
         // set state for first turn
         this.state = State.turn;
+        this.playerBoards.forEach((pb) => {
+            pb.turnUpdated = -4;
+        });
     }
 
     /**
@@ -506,10 +509,10 @@ export class GameState {
      * @param move Move that is to be played for clone
      * @returns Clone of the current gamestate
      */
-    smart_clone(move: Move): GameState {
+    smartClone(move: Move): GameState {
         const gs = new GameState();
 
-        gs.tilebag = this.tilebag;
+        // gs.tilebag = this.tilebag;
         gs.factory = this.factory.map((factory, i) => {
             if (i == move.factory || i == 0) {
                 return factory.slice(0);
@@ -525,17 +528,17 @@ export class GameState {
             }
         });
         // gs.availableMoves = this.availableMoves.slice(0)
-        gs.playedMoves = this.playedMoves;
+        // gs.playedMoves = this.playedMoves;
 
-        gs.nPlayers = this.nPlayers;
+        // gs.nPlayers = this.nPlayers;
         gs.firstTile = this.firstTile;
         gs.round = this.round;
         gs.turn = this.turn;
         gs.activePlayer = this.activePlayer;
         gs.startingPlayer = this.startingPlayer;
         gs.previousPlayer = this.previousPlayer;
-        gs.state = this.state;
-        gs.seed = this.seed;
+        // gs.state = this.state;
+        // gs.seed = this.seed;
         return gs;
     }
 }
