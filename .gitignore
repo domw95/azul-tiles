@@ -4,3 +4,4 @@ node_modules
 /benchmarks/**/*.d.ts
 /examples/**/*.js
 /examples/**/*.d.ts
+/coverage
