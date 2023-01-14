@@ -1,9 +1,5 @@
 // Test to check that the different AI all produce the same evaluation at a certain depth
-import { GameState } from "../src/state.js";
-import { AI, AIMode, AIOpts, EvalMethod } from "../src/ai/players.js";
-import { compareMoves } from "../src/utils.js";
-import { PruningType } from "minimaxer";
-import { Move } from "../src/azul.js";
+import { AI, AIMode, AIOpts, PruningType, GameState, compareMoves, Move } from "../dist/index.js";
 
 const seed = "random";
 
