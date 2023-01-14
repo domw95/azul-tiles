@@ -1,6 +1,4 @@
-import { GameState, printGame } from "../dist/index.js";
-import { AI, AIOpts } from "../dist/ai/players.js";
-import { PruningType } from "minimaxer";
+import { AI, GameState, AIOpts, PruningType } from "../dist/index.js";
 
 // Create a game
 const game = new GameState();
