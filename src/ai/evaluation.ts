@@ -1,5 +1,6 @@
 // A bunch of different function to evaluate a game state
 import * as minimax from "minimaxer";
+import { Tile } from "../azul.js";
 import { GameState } from "../state.js";
 
 /** Simplest gamestate evaluation function */
@@ -9,39 +10,54 @@ export const evalGamestateCallback: minimax.EvaluateGamestateFunc<GameState> = (
     return gamestate.evalScore(0) - gamestate.evalScore(1);
 };
 
-// export function evalValueSimple(node: minimax.Node): number {
-//     let gs = node.gamestate as GameState;
-//     if (gs.round > 4) {
-//         return node.gamestate.evalScore(0) - node.gamestate.evalScore(1);
-//     }
-//     return evalScoreSimple(gs, 0) - evalScoreSimple(gs, 1);
-// }
+/** Centre based evaluation function  */
+export const evalGamestateCentre: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+) => {
+    return expectedScoreCentre(gamestate, 0) - expectedScoreCentre(gamestate, 1);
+};
+function expectedScoreCentre(gs: GameState, player: number): number {
+    // Get the
+    const pb = gs.playerBoards[player];
+    const wall = pb.wall.map((line) => line.slice(0));
+    let score = gs.moveToWall(player, wall) + pb.score; //+ gs.wallScore(wall)
+    if (score < 0) {
+        score = 0;
+    }
+    let exp_score = 0;
+    const weights = [
+        [0.95, 0.96, 0.97, 0.96, 0.95],
+        [0.96, 0.97, 0.98, 0.97, 0.96],
+        [0.97, 0.98, 0.99, 0.98, 0.97],
+        [0.96, 0.97, 0.98, 0.97, 0.96],
+        [0.95, 0.96, 0.97, 0.96, 0.95],
+    ];
+    for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+            if (wall[row][col] != Tile.Null) {
+                exp_score += weights[row][col];
+            }
+        }
+    }
+    return score + exp_score;
+}
 
-// function evalScoreSimple(gs: GameState, player: number): number {
-//     let wall = gs.playerBoards[player].wall.map((line) => line.slice(0));
-//     let score = gs.moveToWall(player, wall) + gs.playerBoards[player].score;
-//     if (score > 0) {
-//         return score;
-//     } else {
-//         return 0;
-//     }
-// }
-
-// export function evalValueQuick(node: minimax.Node): number {
-//     const gs = node.gamestate as GameState;
-//     // Player that just performed move to get to this state
-//     const player = gs.previousPlayer;
-//     const other = player ^ 1;
-//     // Update score from most recent player
-//     gs.playerBoards[player].expectedScore = gs.evalScore(player);
-//     gs.playerBoards[player].turnUpdated = gs.turn;
-//     // Check if opponent needs updating
-//     if (gs.turn - gs.playerBoards[other].turnUpdated > 1) {
-//         gs.playerBoards[other].expectedScore = gs.evalScore(other);
-//         gs.playerBoards[other].turnUpdated = gs.turn;
-//     }
-//     return gs.playerBoards[0].expectedScore - gs.playerBoards[1].expectedScore;
-// }
+export const evalValueQuick: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+): number => {
+    // Player that just performed move to get to this state
+    const player = gamestate.previousPlayer;
+    const other = player ^ 1;
+    // Update score from most recent player
+    gamestate.playerBoards[player].expectedScore = gamestate.evalScore(player);
+    gamestate.playerBoards[player].turnUpdated = gamestate.turn;
+    // Check if opponent needs updating
+    if (gamestate.turn - gamestate.playerBoards[other].turnUpdated > 1) {
+        gamestate.playerBoards[other].expectedScore = gamestate.evalScore(other);
+        gamestate.playerBoards[other].turnUpdated = gamestate.turn;
+    }
+    return gamestate.playerBoards[0].expectedScore - gamestate.playerBoards[1].expectedScore;
+};
 
 // export function evalValueV2(node: minimax.Node): number {
 //     return expectedScoreV2(node.gamestate, 0) - expectedScoreV2(node.gamestate, 1);
@@ -245,32 +261,6 @@ export const evalGamestateCallback: minimax.EvaluateGamestateFunc<GameState> = (
 
 // export function evalValueV4(node: minimax.Node): number {
 //     return expectedScoreV4(node.gamestate, 0) - expectedScoreV4(node.gamestate, 1);
-// }
-
-// function expectedScoreV4(gs: GameState, player: number): number {
-//     // Get the
-//     const pb = gs.playerBoards[player];
-//     let wall = pb.wall.map((line) => line.slice(0));
-//     let score = gs.moveToWall(player, wall) + pb.score; //+ gs.wallScore(wall)
-//     if (score < 0) {
-//         score = 0;
-//     }
-//     let exp_score = 0;
-//     const weights = [
-//         [0.95, 0.96, 0.97, 0.96, 0.95],
-//         [0.96, 0.97, 0.98, 0.97, 0.96],
-//         [0.97, 0.98, 0.99, 0.98, 0.97],
-//         [0.96, 0.97, 0.98, 0.97, 0.96],
-//         [0.95, 0.96, 0.97, 0.96, 0.95],
-//     ];
-//     for (var row = 0; row < 5; row++) {
-//         for (var col = 0; col < 5; col++) {
-//             if (wall[row][col] != Tile.Null) {
-//                 exp_score += weights[row][col];
-//             }
-//         }
-//     }
-//     return score + exp_score;
 // }
 
 // // Maximin (2+ players) score evaluation
