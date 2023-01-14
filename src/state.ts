@@ -525,7 +525,7 @@ export class GameState {
         // gs.availableMoves = this.availableMoves.slice(0)
         // gs.playedMoves = this.playedMoves;
 
-        // gs.nPlayers = this.nPlayers;
+        gs.nPlayers = this.nPlayers;
         gs.firstTile = this.firstTile;
         gs.round = this.round;
         gs.turn = this.turn;
