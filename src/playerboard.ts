@@ -146,3 +146,53 @@ export function placeOnWall(tile: Tile, lineindex: number, wall: Array<Array<Til
     }
     return score;
 }
+
+/**
+ *
+ * @param wall Wall to calculate score of
+ * @returns The total score from row, columns and colours
+ */
+export function wallScore(wall: Array<Array<Tile>>): number {
+    let score = 0;
+    // row scores
+    wall.forEach((row) => {
+        // check if full row
+        if (row.filter((x) => x != Tile.Null).length == 5) {
+            score += 2;
+        }
+    });
+
+    // column scores
+    for (let j = 0; j < 5; j++) {
+        for (let i = 0; i < 5; i++) {
+            if (wall[i][j] == Tile.Null) {
+                break;
+            } else if (i == 4) {
+                score += 7;
+            }
+        }
+    }
+
+    // colour scores
+    [Tile.Red, Tile.Yellow, Tile.Black, Tile.Blue, Tile.White].forEach((tile) => {
+        // go through to find wall positions
+        let fail = false;
+        for (let i = 0; i < 5; i++) {
+            for (let j = 0; j < 5; j++) {
+                if (PlayerBoard.wallTypes[i][j] == tile) {
+                    if (wall[i][j] != tile) {
+                        fail = true;
+                        break;
+                    }
+                }
+            }
+            if (fail) {
+                break;
+            }
+        }
+        if (!fail) {
+            score += 10;
+        }
+    });
+    return score;
+}

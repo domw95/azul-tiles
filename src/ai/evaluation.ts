@@ -1,7 +1,7 @@
 // A bunch of different function to evaluate a game state
 import * as minimax from "minimaxer";
 import { Tile } from "../azul.js";
-import { moveToWall, placeOnWall } from "../playerboard.js";
+import { moveToWall, placeOnWall, wallScore } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /** Simplest gamestate evaluation function */
@@ -92,7 +92,7 @@ function expectedScoreForecast(gs: GameState, player: number): number {
     const pb = gs.playerBoards[player];
     const wall = pb.wall.map((line) => line.slice(0));
     // Get scores for moving full lines to wall
-    let score = moveToWall(pb, wall) + pb.score;
+    let score = moveToWall(pb, wall) + pb.score + wallScore(wall);
     if (score < 0) {
         score = 0;
     }

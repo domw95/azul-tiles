@@ -1,6 +1,6 @@
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
-import { PlayerBoard, moveToWall } from "./playerboard.js";
+import { PlayerBoard, moveToWall, wallScore } from "./playerboard.js";
 
 /** Tracks state of the game */
 export enum State {
@@ -202,7 +202,7 @@ export class GameState {
         if (done) {
             this.state = State.gameEnd;
             this.playerBoards.forEach((pb) => {
-                pb.score += this.wallScore(pb.wall);
+                pb.score += wallScore(pb.wall);
             });
             // Assign winner
             let best_score = 0;
@@ -330,56 +330,6 @@ export class GameState {
 
     /**
      *
-     * @param wall Wall to calculate score of
-     * @returns The total score from row, columns and colours
-     */
-    wallScore(wall: Array<Array<Tile>>): number {
-        let score = 0;
-        // row scores
-        wall.forEach((row) => {
-            // check if full row
-            if (row.filter((x) => x != Tile.Null).length == 5) {
-                score += 2;
-            }
-        });
-
-        // column scores
-        for (let j = 0; j < 5; j++) {
-            for (let i = 0; i < 5; i++) {
-                if (wall[i][j] == Tile.Null) {
-                    break;
-                } else if (i == 4) {
-                    score += 7;
-                }
-            }
-        }
-
-        // colour scores
-        [Tile.Red, Tile.Yellow, Tile.Black, Tile.Blue, Tile.White].forEach((tile) => {
-            // go through to find wall positions
-            let fail = false;
-            for (let i = 0; i < 5; i++) {
-                for (let j = 0; j < 5; j++) {
-                    if (PlayerBoard.wallTypes[i][j] == tile) {
-                        if (wall[i][j] != tile) {
-                            fail = true;
-                            break;
-                        }
-                    }
-                }
-                if (fail) {
-                    break;
-                }
-            }
-            if (!fail) {
-                score += 10;
-            }
-        });
-        return score;
-    }
-
-    /**
-     *
      * @param player Player to evaluate score of
      * @returns The total score the player would have if the round ended now
      */
@@ -389,7 +339,7 @@ export class GameState {
         const score =
             moveToWall(this.playerBoards[player], wall) +
             this.playerBoards[player].score +
-            this.wallScore(wall);
+            wallScore(wall);
         if (score > 0) {
             return score;
         } else {
