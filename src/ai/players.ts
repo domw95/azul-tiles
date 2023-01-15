@@ -5,6 +5,7 @@ import { getMovesCallback } from "./ai.js";
 import {
     evalGamestateCallback,
     evalGamestateCentre,
+    evalGamestateForecast,
     evalGamestateNice0,
     evalGamestateNice1,
     evalValueQuick,
@@ -44,6 +45,7 @@ export const enum EvalMethod {
     STANDARD,
     CENTRE,
     NICE,
+    FORECAST,
 }
 
 // Options for creating a Negamax player
@@ -108,6 +110,8 @@ export class AI implements PlayerInterface {
             } else {
                 evalCallback = evalGamestateNice1;
             }
+        } else if (this.opts.eval == EvalMethod.FORECAST) {
+            evalCallback = evalGamestateForecast;
         } else if (this.opts.evalQuick) {
             evalCallback = evalValueQuick;
         }
