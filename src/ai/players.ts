@@ -2,7 +2,12 @@ import * as minimax from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
 import { GameState } from "../state.js";
 import { getMovesCallback } from "./ai.js";
-import { evalGamestateCallback, evalGamestateCentre, evalValueQuick } from "./evaluation.js";
+import {
+    evalGamestateCallback,
+    evalGamestateCentre,
+    evalGamestateNice,
+    evalValueQuick,
+} from "./evaluation.js";
 import { createChildCallback, createChildSmartClone } from "./move_play.js";
 
 function printResult(result: minimax.NegamaxResult<Move>): void {
@@ -37,6 +42,7 @@ export const enum CloneMethod {
 export const enum EvalMethod {
     STANDARD,
     CENTRE,
+    NICE,
 }
 
 // Options for creating a Negamax player
@@ -95,6 +101,8 @@ export class AI implements PlayerInterface {
         let evalCallback = evalGamestateCallback;
         if (this.opts.eval == EvalMethod.CENTRE) {
             evalCallback = evalGamestateCentre;
+        } else if (this.opts.eval == EvalMethod.NICE) {
+            evalCallback = evalGamestateNice;
         } else if (this.opts.evalQuick) {
             evalCallback = evalValueQuick;
         }
