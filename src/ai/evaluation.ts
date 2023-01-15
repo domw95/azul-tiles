@@ -1,7 +1,7 @@
 // A bunch of different function to evaluate a game state
 import * as minimax from "minimaxer";
 import { Tile } from "../azul.js";
-import { PlayerBoard } from "../playerboard.js";
+import { moveToWall, placeOnWall, PlayerBoard } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /** Simplest gamestate evaluation function */
@@ -43,7 +43,7 @@ function expectedScoreCentre(gs: GameState, player: number): number {
     // Get the
     const pb = gs.playerBoards[player];
     const wall = pb.wall.map((line) => line.slice(0));
-    let score = gs.moveToWall(player, wall) + pb.score; //+ gs.wallScore(wall)
+    let score = moveToWall(pb, wall) + pb.score; //+ gs.wallScore(wall)
     if (score < 0) {
         score = 0;
     }
@@ -91,60 +91,22 @@ function expectedScoreForecast(gs: GameState, player: number): number {
     // Get the
     const pb = gs.playerBoards[player];
     const wall = pb.wall.map((line) => line.slice(0));
-    let score = gs.moveToWall(player, wall) + pb.score;
+    // Get scores for moving full lines to wall
+    let score = moveToWall(pb, wall) + pb.score;
     if (score < 0) {
         score = 0;
     }
-    let exp_score = 0;
-    // row scores
-    wall.forEach((row, n) => {
-        // check if full row
-        const len = row.filter((x) => x != Tile.Null).length;
-        if (len == 5) {
-            score += 2;
-        } else if (gs.round == len) {
-            exp_score += 2 * round_weight;
-        }
-    });
 
-    // column scores
-    for (let j = 0; j < 5; j++) {
-        let count = 0;
-        let weight = 0;
-        for (let i = 0; i < 5; i++) {
-            if (wall[i][j] != Tile.Null) {
-                count++;
-                weight += i + 1;
-            }
-        }
-        if (count == 5) {
-            score += 7;
-        } else {
-            exp_score += (weight / 15) * 7 * round_weight;
+    let exp_score = 0;
+    // Get possible scores for almost full lines
+    for (let i = 1; i < 5; i++) {
+        const length = i + 1;
+        const missing = length - pb.lines[i].length;
+        // If some tiles in line but not full
+        if (missing && missing < length) {
+            exp_score += (placeOnWall(pb.lines[i][0], i, wall) * round_weight) / missing;
         }
     }
-
-    // colour scores
-    [Tile.Red, Tile.Yellow, Tile.Black, Tile.Blue, Tile.White].forEach((tile) => {
-        // go through to find wall positions
-        let count = 0;
-        let weight = 0;
-        for (let i = 0; i < 5; i++) {
-            for (let j = 0; j < 5; j++) {
-                if (PlayerBoard.wallTypes[i][j] == tile) {
-                    if (wall[i][j] == tile) {
-                        count++;
-                        weight += i + 1;
-                    }
-                }
-            }
-        }
-        if (count == 5) {
-            score += 10;
-        } else {
-            exp_score += (weight / 15) * 10 * round_weight;
-        }
-    });
     return score + exp_score;
 }
 
