@@ -11,14 +11,15 @@ export const evalGamestateCallback: minimax.EvaluateGamestateFunc<GameState> = (
 };
 
 /** Nice evaluation function, only cares about its own score */
-export const evalGamestateNice: minimax.EvaluateGamestateFunc<GameState> = (
+export const evalGamestateNice0: minimax.EvaluateGamestateFunc<GameState> = (
     gamestate: GameState,
 ) => {
-    if (gamestate.previousPlayer == 0) {
-        return gamestate.evalScore(0);
-    } else {
-        return -gamestate.evalScore(1);
-    }
+    return gamestate.evalScore(0);
+};
+export const evalGamestateNice1: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+) => {
+    return -gamestate.evalScore(1);
 };
 
 /** Centre based evaluation function  */

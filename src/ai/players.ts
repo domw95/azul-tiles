@@ -5,7 +5,8 @@ import { getMovesCallback } from "./ai.js";
 import {
     evalGamestateCallback,
     evalGamestateCentre,
-    evalGamestateNice,
+    evalGamestateNice0,
+    evalGamestateNice1,
     evalValueQuick,
 } from "./evaluation.js";
 import { createChildCallback, createChildSmartClone } from "./move_play.js";
@@ -102,7 +103,11 @@ export class AI implements PlayerInterface {
         if (this.opts.eval == EvalMethod.CENTRE) {
             evalCallback = evalGamestateCentre;
         } else if (this.opts.eval == EvalMethod.NICE) {
-            evalCallback = evalGamestateNice;
+            if (this.id == 0) {
+                evalCallback = evalGamestateNice0;
+            } else {
+                evalCallback = evalGamestateNice1;
+            }
         } else if (this.opts.evalQuick) {
             evalCallback = evalValueQuick;
         }
