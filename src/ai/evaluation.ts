@@ -1,7 +1,7 @@
 // A bunch of different function to evaluate a game state
 import * as minimax from "minimaxer";
 import { Tile } from "../azul.js";
-import { moveToWall, placeOnWall, PlayerBoard } from "../playerboard.js";
+import { moveToWall, placeOnWall } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /** Simplest gamestate evaluation function */
@@ -87,7 +87,7 @@ export const evalValueQuick: minimax.EvaluateGamestateFunc<GameState> = (
 // }
 
 function expectedScoreForecast(gs: GameState, player: number): number {
-    const round_weight = Math.max(0, 4 - gs.round) / 4;
+    const round_weight = Math.max(0, 4 - gs.round) / 5;
     // Get the
     const pb = gs.playerBoards[player];
     const wall = pb.wall.map((line) => line.slice(0));
@@ -104,7 +104,7 @@ function expectedScoreForecast(gs: GameState, player: number): number {
         const missing = length - pb.lines[i].length;
         // If some tiles in line but not full
         if (missing && missing < length) {
-            exp_score += (placeOnWall(pb.lines[i][0], i, wall) * round_weight) / missing;
+            exp_score += (placeOnWall(pb.lines[i][0], i, wall) * round_weight) / (missing + 0.5);
         }
     }
     return score + exp_score;
