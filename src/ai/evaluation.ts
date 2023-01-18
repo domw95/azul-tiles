@@ -1,6 +1,7 @@
 // A bunch of different function to evaluate a game state
 import * as minimax from "minimaxer";
 import { Tile } from "../azul.js";
+import { moveToWall, placeOnWall, wallScore } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /** Simplest gamestate evaluation function */
@@ -10,17 +11,39 @@ export const evalGamestateCallback: minimax.EvaluateGamestateFunc<GameState> = (
     return gamestate.evalScore(0) - gamestate.evalScore(1);
 };
 
+/** Nice evaluation function, only cares about its own score */
+export const evalGamestateNice0: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+) => {
+    return gamestate.evalScore(0);
+};
+export const evalGamestateNice1: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+) => {
+    return -gamestate.evalScore(1);
+};
+
 /** Centre based evaluation function  */
 export const evalGamestateCentre: minimax.EvaluateGamestateFunc<GameState> = (
     gamestate: GameState,
 ) => {
     return expectedScoreCentre(gamestate, 0) - expectedScoreCentre(gamestate, 1);
 };
+
+/** Forecast future score with weight based on round number / row
+ *
+ */
+export const evalGamestateForecast: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+) => {
+    return expectedScoreForecast(gamestate, 0) - expectedScoreForecast(gamestate, 1);
+};
+
 function expectedScoreCentre(gs: GameState, player: number): number {
     // Get the
     const pb = gs.playerBoards[player];
     const wall = pb.wall.map((line) => line.slice(0));
-    let score = gs.moveToWall(player, wall) + pb.score; //+ gs.wallScore(wall)
+    let score = moveToWall(pb, wall) + pb.score; //+ gs.wallScore(wall)
     if (score < 0) {
         score = 0;
     }
@@ -63,83 +86,29 @@ export const evalValueQuick: minimax.EvaluateGamestateFunc<GameState> = (
 //     return expectedScoreV2(node.gamestate, 0) - expectedScoreV2(node.gamestate, 1);
 // }
 
-// export function evalValueQuickV2(node: minimax.Node): number {
-//     const gs = node.gamestate as GameState;
-//     // Player that just performed move to get to this state
-//     const player = gs.previousPlayer;
-//     const other = player ^ 1;
-//     // Update score from most recent player
-//     gs.playerBoards[player].expectedScore = expectedScoreV2(gs, player);
-//     gs.playerBoards[player].turnUpdated = gs.turn;
-//     // Check if opponent needs updating
-//     if (gs.turn - gs.playerBoards[other].turnUpdated > 1) {
-//         gs.playerBoards[other].expectedScore = expectedScoreV2(gs, other);
-//         gs.playerBoards[other].turnUpdated = gs.turn;
-//     }
-//     return gs.playerBoards[0].expectedScore - gs.playerBoards[1].expectedScore;
-// }
+function expectedScoreForecast(gs: GameState, player: number): number {
+    const round_weight = Math.max(0, 4 - gs.round) / 5;
+    // Get the
+    const pb = gs.playerBoards[player];
+    const wall = pb.wall.map((line) => line.slice(0));
+    // Get scores for moving full lines to wall
+    let score = moveToWall(pb, wall) + pb.score + wallScore(wall);
+    if (score < 0) {
+        score = 0;
+    }
 
-// function expectedScoreV2(gs: GameState, player: number): number {
-//     const round_weight = (4 - gs.round) / 4;
-//     // Get the
-//     const pb = gs.playerBoards[player];
-//     let wall = pb.wall.map((line) => line.slice(0));
-//     let score = gs.moveToWall(player, wall) + pb.score;
-//     if (score < 0) {
-//         score = 0;
-//     }
-//     let exp_score = 0;
-//     // row scores
-//     wall.forEach((row, n) => {
-//         // check if full row
-//         const len = row.filter((x) => x != Tile.Null).length;
-//         if (len == 5) {
-//             score += 2;
-//         } else if (gs.round == len) {
-//             exp_score += 2 * round_weight;
-//         }
-//     });
-
-//     // column scores
-//     for (var j = 0; j < 5; j++) {
-//         let count = 0;
-//         let weight = 0;
-//         for (var i = 0; i < 5; i++) {
-//             if (wall[i][j] != Tile.Null) {
-//                 count++;
-//                 weight += i + 1;
-//             }
-//         }
-//         if (count == 5) {
-//             score += 7;
-//         } else {
-//             exp_score += (weight / 15) * 7 * round_weight;
-//         }
-//     }
-
-//     // colour scores
-//     [Tile.Red, Tile.Yellow, Tile.Black, Tile.Blue, Tile.White].forEach((tile) => {
-//         // go through to find wall positions
-//         let count = 0;
-//         let weight = 0;
-//         for (var i = 0; i < 5; i++) {
-//             for (var j = 0; j < 5; j++) {
-//                 if (PlayerBoard.wallTypes[i][j] == tile) {
-//                     if (wall[i][j] == tile) {
-//                         count++;
-//                         weight += i + 1;
-//                     }
-//                 }
-//             }
-//         }
-//         if (count == 5) {
-//             score += 10;
-//         } else {
-//             exp_score += (weight / 15) * 10 * round_weight;
-//         }
-//     });
-//     return score + exp_score;
-// }
+    let exp_score = 0;
+    // Get possible scores for almost full lines
+    for (let i = 1; i < 5; i++) {
+        const length = i + 1;
+        const missing = length - pb.lines[i].length;
+        // If some tiles in line but not full
+        if (missing && missing < length) {
+            exp_score += (placeOnWall(pb.lines[i][0], i, wall) * round_weight) / (missing + 0.5);
+        }
+    }
+    return score + exp_score;
+}
 
 // export function evalValueQuickV3(node: minimax.Node): number {
 //     const gs = node.gamestate as GameState;

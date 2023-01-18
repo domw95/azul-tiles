@@ -1,6 +1,6 @@
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
-import { PlayerBoard } from "./playerboard.js";
+import { PlayerBoard, moveToWall, wallScore } from "./playerboard.js";
 
 /** Tracks state of the game */
 export enum State {
@@ -166,7 +166,7 @@ export class GameState {
                 this.activePlayer = i;
             }
             // move tiles and get score
-            pb.score += this.moveToWall(i, pb.wall);
+            pb.score += moveToWall(pb, pb.wall);
             // move leftover tiles from lines back to bag
             pb.lines.forEach((line, linenumber) => {
                 if (line.length == linenumber + 1) {
@@ -202,7 +202,7 @@ export class GameState {
         if (done) {
             this.state = State.gameEnd;
             this.playerBoards.forEach((pb) => {
-                pb.score += this.wallScore(pb.wall);
+                pb.score += wallScore(pb.wall);
             });
             // Assign winner
             let best_score = 0;
@@ -257,11 +257,6 @@ export class GameState {
                 this.availableMoves.push(new Move(this.activePlayer, factoryid, tile, 5));
             });
         });
-
-        // Add firstplayer tile straight to floor
-        if (this.firstTile == Tile.FirstPlayer) {
-            this.availableMoves.push(new Move(this.activePlayer, 0, Tile.FirstPlayer, 5));
-        }
     }
 
     /**
@@ -334,135 +329,6 @@ export class GameState {
     }
 
     /**
-     * Places tiles in the wall correspnding to full line in the `player`'s board and calulcates score.
-     * Does not remove tiles from the lines
-     * @param player player whose board the line tiles should be 'taken' from
-     * @param wall Wall that the tiles are to be placed in
-     * @returns The score for moving these tiles only
-     */
-    moveToWall(player: number, wall: Array<Array<Tile>>): number {
-        // if a line is full, puts a tile in the wall.
-        // does not remove tiles from lines
-        // used for evaluation and end of round
-        let score = 0;
-        const pb = this.playerBoards[player];
-
-        pb.lines.forEach((line, lineindex) => {
-            // check if line is full
-            if (line.length == lineindex + 1) {
-                // find where tile would go on wall
-                const tile = line[0];
-                const colindex = PlayerBoard.wallTypes[lineindex].indexOf(tile);
-                // place tile in wall
-                wall[lineindex][colindex] = tile;
-                // check horizontal scores
-                let horscore = 0;
-                for (let i = colindex - 1; i >= 0; i--) {
-                    if (wall[lineindex][i] != Tile.Null) {
-                        horscore++;
-                    } else {
-                        break;
-                    }
-                }
-                for (let i = colindex + 1; i < 5; i++) {
-                    if (wall[lineindex][i] != Tile.Null) {
-                        horscore++;
-                    } else {
-                        break;
-                    }
-                }
-                if (horscore) {
-                    horscore++;
-                }
-                // check vertical scores
-                let vertscore = 0;
-                for (let j = lineindex - 1; j >= 0; j--) {
-                    if (wall[j][colindex] != Tile.Null) {
-                        vertscore++;
-                    } else {
-                        break;
-                    }
-                }
-                for (let j = lineindex + 1; j < 5; j++) {
-                    if (wall[j][colindex] != Tile.Null) {
-                        vertscore++;
-                    } else {
-                        break;
-                    }
-                }
-                if (vertscore) {
-                    vertscore++;
-                }
-
-                if (!vertscore && !horscore) {
-                    score++;
-                } else {
-                    score += vertscore + horscore;
-                }
-            }
-        });
-        // check floor score
-        pb.floor.forEach((tile, i) => {
-            if (i < PlayerBoard.floorScores.length) {
-                score += PlayerBoard.floorScores[i];
-            }
-        });
-
-        // check if horizontal is complete
-        return score;
-    }
-
-    /**
-     *
-     * @param wall Wall to calculate score of
-     * @returns The total score from row, columns and colours
-     */
-    wallScore(wall: Array<Array<Tile>>): number {
-        let score = 0;
-        // row scores
-        wall.forEach((row) => {
-            // check if full row
-            if (row.filter((x) => x != Tile.Null).length == 5) {
-                score += 2;
-            }
-        });
-
-        // column scores
-        for (let j = 0; j < 5; j++) {
-            for (let i = 0; i < 5; i++) {
-                if (wall[i][j] == Tile.Null) {
-                    break;
-                } else if (i == 4) {
-                    score += 7;
-                }
-            }
-        }
-
-        // colour scores
-        [Tile.Red, Tile.Yellow, Tile.Black, Tile.Blue, Tile.White].forEach((tile) => {
-            // go through to find wall positions
-            let fail = false;
-            for (let i = 0; i < 5; i++) {
-                for (let j = 0; j < 5; j++) {
-                    if (PlayerBoard.wallTypes[i][j] == tile) {
-                        if (wall[i][j] != tile) {
-                            fail = true;
-                            break;
-                        }
-                    }
-                }
-                if (fail) {
-                    break;
-                }
-            }
-            if (!fail) {
-                score += 10;
-            }
-        });
-        return score;
-    }
-
-    /**
      *
      * @param player Player to evaluate score of
      * @returns The total score the player would have if the round ended now
@@ -471,7 +337,9 @@ export class GameState {
         // create new wall to apply changes to
         const wall = this.playerBoards[player].wall.map((line) => line.slice(0));
         const score =
-            this.moveToWall(player, wall) + this.playerBoards[player].score + this.wallScore(wall);
+            moveToWall(this.playerBoards[player], wall) +
+            this.playerBoards[player].score +
+            wallScore(wall);
         if (score > 0) {
             return score;
         } else {
@@ -530,14 +398,14 @@ export class GameState {
         // gs.availableMoves = this.availableMoves.slice(0)
         // gs.playedMoves = this.playedMoves;
 
-        // gs.nPlayers = this.nPlayers;
+        gs.nPlayers = this.nPlayers;
         gs.firstTile = this.firstTile;
         gs.round = this.round;
         gs.turn = this.turn;
         gs.activePlayer = this.activePlayer;
         gs.startingPlayer = this.startingPlayer;
         gs.previousPlayer = this.previousPlayer;
-        // gs.state = this.state;
+        gs.state = this.state;
         // gs.seed = this.seed;
         return gs;
     }
