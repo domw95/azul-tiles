@@ -8,6 +8,7 @@ import {
     evalGamestateForecast,
     evalGamestateNice0,
     evalGamestateNice1,
+    evalGamestateWithLine,
     evalValueQuick,
 } from "./evaluation.js";
 import { createChildCallback, createChildSmartClone } from "./move_play.js";
@@ -46,6 +47,7 @@ export const enum EvalMethod {
     CENTRE,
     NICE,
     FORECAST,
+    LINE,
 }
 
 // Options for creating a Negamax player
@@ -112,6 +114,8 @@ export class AI implements PlayerInterface {
             }
         } else if (this.opts.eval == EvalMethod.FORECAST) {
             evalCallback = evalGamestateForecast;
+        } else if (this.opts.eval == EvalMethod.LINE) {
+            evalCallback = evalGamestateWithLine;
         } else if (this.opts.evalQuick) {
             evalCallback = evalValueQuick;
         }

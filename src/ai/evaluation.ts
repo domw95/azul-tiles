@@ -10,6 +10,21 @@ export const evalGamestateCallback: minimax.EvaluateGamestateFunc<GameState> = (
 ) => {
     return gamestate.evalScore(0) - gamestate.evalScore(1);
 };
+export const evalGamestateWithLine: minimax.EvaluateGamestateFunc<GameState> = (
+    gamestate: GameState,
+) => {
+    let value = gamestate.evalScore(0) - gamestate.evalScore(1);
+    const prev_move = gamestate.playedMoves.at(-1);
+    if (prev_move !== undefined && prev_move.line != 5) {
+        const line_value = (prev_move.line + 1) / 10;
+        if (gamestate.previousPlayer == 0) {
+            value += line_value;
+        } else {
+            value -= line_value;
+        }
+    }
+    return value;
+};
 
 /** Nice evaluation function, only cares about its own score */
 export const evalGamestateNice0: minimax.EvaluateGamestateFunc<GameState> = (
