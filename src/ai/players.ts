@@ -3,6 +3,7 @@ import { Move, PlayerInterface, PlayerType } from "../azul.js";
 import { GameState } from "../state.js";
 import { getMovesCallback } from "./ai.js";
 import { evalGamestateCallback, evalGamestateNice0, evalGamestateNice1 } from "./evaluation.js";
+import { generalCallback, NodeData } from "./generic.js";
 import { createChildCallback, createChildSmartClone } from "./move_play.js";
 
 function printResult(result: minimax.NegamaxResult<Move>): void {
@@ -33,6 +34,7 @@ export const enum EvalMethod {
     CENTRE,
     NICE,
     FORECAST,
+    GENERAL,
 }
 
 // Options for creating a Negamax player
@@ -100,10 +102,20 @@ export class AI implements PlayerInterface {
         } else if (this.opts.evalQuick) {
             // evalCallback = evalValueQuick;
         }
-        const tree = new minimax.Negamax(gamestate, aim, gamestate.availableMoves, this.opts);
-        tree.EvaluateNode = evalCallback;
-        tree.GetMoves = getMovesCallback;
-        tree.CreateChildNode = childCallback;
+        const tree: minimax.Negamax<GameState, Move, any> = new minimax.Negamax(
+            gamestate,
+            aim,
+            gamestate.availableMoves,
+            this.opts,
+        );
+        if (this.opts.eval == EvalMethod.GENERAL) {
+            tree.CreateChildNode = generalCallback;
+            tree.activeRoot.data = new NodeData();
+        } else {
+            tree.EvaluateNode = evalCallback;
+            tree.GetMoves = getMovesCallback;
+            tree.CreateChildNode = childCallback;
+        }
 
         if (this.opts.print) {
             tree.depthCallback = (

@@ -13,7 +13,7 @@ opts.pruning = PruningType.ALPHA_BETA;
 const player0 = new AI(0, opts);
 
 opts = structuredClone(opts);
-// opts.optimal = true;
+opts.eval = EvalMethod.GENERAL;
 
 const player1 = new AI(1, opts);
 
