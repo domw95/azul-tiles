@@ -2,8 +2,6 @@
 import { SearchMethod } from "minimaxer";
 import { AI, AIOpts, PruningType, GameState, compareMoves, Move } from "../dist/index.js";
 
-const seed = "random";
-
 // Create a new game
 const game = new GameState();
 game.newGame(2);
@@ -23,7 +21,7 @@ opts.optimal = true;
 
 players.push(new AI(0, opts));
 
-while (true) {
+for (;;) {
     player.id = game.activePlayer;
     const move = player.getMove(game) as Move;
     for (const other of players) {
