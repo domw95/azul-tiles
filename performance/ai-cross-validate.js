@@ -1,5 +1,4 @@
 import { AI, AIOpts, GameState, compareMoves } from "../dist/index.js";
-const seed = "random";
 // Create a new game
 const game = new GameState();
 game.newGame(2);
@@ -14,7 +13,7 @@ opts = structuredClone(opts);
 opts.pruning = 1 /* PruningType.ALPHA_BETA */;
 opts.optimal = true;
 players.push(new AI(0, opts));
-while (true) {
+for (;;) {
     player.id = game.activePlayer;
     const move = player.getMove(game);
     for (const other of players) {

@@ -51,6 +51,7 @@ export class PlayerCompare {
     compare_alternate(ngames = Infinity) {
         for (let played = 0; played < ngames; played++) {
             const game = new Game();
+            console.log("Game seed", game.gamestate.seed);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             this.players.forEach((player, i) => {
                 // Make a clone of gamestate for rng

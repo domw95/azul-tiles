@@ -18,7 +18,7 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
     const activePlayer = parent.gamestate.activePlayer;
 
     // Clone gamestate and play move
-    const new_gamestate = parent.gamestate.smartClone(move);
+    const new_gamestate = new GameState(parent.gamestate, move);
     new_gamestate.playMove(move);
 
     // Evaluate node value

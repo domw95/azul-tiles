@@ -10,7 +10,7 @@ const player0 = new AI(0, opts0);
 
 const opts1 = new AIOpts();
 opts1.timeout = 100;
-opts1.pruning = PruningType.ALPHA_BETA;
+// opts1.pruning = PruningType.ALPHA_BETA;
 opts1.method = SearchMethod.TIME;
 
 const player1 = new AI(1, opts1);

@@ -13,6 +13,7 @@
         "build:benchmarks": "npm run build && npx tsc -p benchmarks/",
         "build:performance": "npm run build && npx tsc -p performance/",
         "build:docs": "typedoc",
+        "clean": "rm -rf performance/*.js && rm -rf examples/*.js && rm -rf benchmarks/*.js && rm -rf dist/*",
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint .",
         "prepare": "npm run build",

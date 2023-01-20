@@ -130,9 +130,11 @@ export class AI implements PlayerInterface {
         // Get the result
         const result = tree.evaluate();
         if (this.opts.print) {
-            printResult(result);
+            // printResult(result);
+            console.log(result);
         }
         // Return move
+
         return result.move;
     }
 
