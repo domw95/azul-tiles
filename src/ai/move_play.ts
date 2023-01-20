@@ -7,31 +7,31 @@ import { GameState } from "../state.js";
  * Simple callback to create a new child
  * Uses standard clone function, plays move, checks for next turn and returns node
  */
-export const createChildCallback: minimax.CreateChildNodeFunc<GameState, Move> = (
-    gamestate: GameState,
+export const createChildCallback: minimax.CreateChildNodeFunc<GameState, Move, unknown> = (
+    parent: minimax.Node<GameState, Move, unknown>,
     move: Move,
-): minimax.Node<GameState, Move> => {
+): minimax.Node<GameState, Move, unknown> => {
     // Clone gamestate and play move
-    const child = gamestate.clone();
-    child.playMove(move);
-    if (!child.nextTurn()) {
-        return new minimax.Node(minimax.NodeType.LEAF, child, move);
+    const new_gamestate = parent.gamestate.clone();
+    new_gamestate.playMove(move);
+    if (!new_gamestate.nextTurn()) {
+        return new minimax.Node(minimax.NodeType.LEAF, new_gamestate, move);
     } else {
-        return new minimax.Node(minimax.NodeType.INNER, child, move);
+        return new minimax.Node(minimax.NodeType.INNER, new_gamestate, move);
     }
 };
 
-export const createChildSmartClone: minimax.CreateChildNodeFunc<GameState, Move> = (
-    gamestate: GameState,
+export const createChildSmartClone: minimax.CreateChildNodeFunc<GameState, Move, unknown> = (
+    parent: minimax.Node<GameState, Move, unknown>,
     move: Move,
-): minimax.Node<GameState, Move> => {
+): minimax.Node<GameState, Move, unknown> => {
     // Clone gamestate and play move
-    const child = gamestate.smartClone(move);
-    child.playMove(move);
-    if (!child.nextTurn()) {
-        return new minimax.Node(minimax.NodeType.LEAF, child, move);
+    const new_gamestate = parent.gamestate.smartClone(move);
+    new_gamestate.playMove(move);
+    if (!new_gamestate.nextTurn()) {
+        return new minimax.Node(minimax.NodeType.LEAF, new_gamestate, move);
     } else {
-        return new minimax.Node(minimax.NodeType.INNER, child, move);
+        return new minimax.Node(minimax.NodeType.INNER, new_gamestate, move);
     }
 };
 
