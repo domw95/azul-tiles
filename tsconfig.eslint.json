@@ -7,10 +7,10 @@
     },
     "include": [
         // whatever paths you intend to lint
-        "src/**/*",
-        "tests/**/*",
-        "examples/**/*",
-        // "performance/**/*.ts",
-        "benchmarks/**/*"
+        "src",
+        "tests",
+        "examples",
+        "performance",
+        "benchmarks"
     ]
 }
