@@ -12,6 +12,14 @@ export class PlayerBoard {
         [Tile.Red, Tile.Black, Tile.White, Tile.Blue, Tile.Yellow],
         [Tile.Yellow, Tile.Red, Tile.Black, Tile.White, Tile.Blue],
     ];
+    /** Get the index of tile colour via a lineindex */
+    static wallLocations: number[][] = [
+        [0, 1, 2, 3, 4],
+        [1, 2, 3, 4, 0],
+        [2, 3, 4, 0, 1],
+        [3, 4, 0, 1, 2],
+        [4, 0, 1, 2, 3],
+    ];
     /** Scores of floor locations */
     static floorScores: Array<number> = [-1, -1, -2, -2, -2, -3, -3];
 
