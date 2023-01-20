@@ -23,11 +23,11 @@ export class GameState {
     /** Holds all the tiles which are dealt to factories */
     tilebag: Array<Tile> = [];
     /** Array of factories to hold tiles. Factory[0] is centre */
-    factory: Array<Array<Tile>> = [];
+    factory: Array<Array<Tile>>;
     /** If equal to  {@link azul.Tile.FirstPlayer}, first player tile is in centre*/
     firstTile: Tile = Tile.FirstPlayer;
     /** Array that holds the players board state */
-    playerBoards: Array<PlayerBoard> = [];
+    playerBoards: Array<PlayerBoard>;
     /** List of moves available to current player */
     availableMoves: Array<Move> = [];
     /** List of moves played in this round */
@@ -47,12 +47,50 @@ export class GameState {
 
     /** Used to generate a random game */
     rng: seedrandom.PRNG = seedrandom();
+    seed: string;
 
     /**
      *
      * @param seed Seed the random number generator to play a specific game. Random otherwise
      */
-    constructor(public seed: string = Math.random().toString()) {}
+    constructor(gamestate?: GameState, move?: Move) {
+        if (gamestate !== undefined && move !== undefined) {
+            this.factory = new Array(gamestate.factory.length) as Tile[][];
+            for (let i = 0; i < gamestate.factory.length; i++) {
+                if (i == move.factory || i == 0) {
+                    this.factory[i] = gamestate.factory[i].slice(0);
+                } else {
+                    this.factory[i] = gamestate.factory[i];
+                }
+            }
+
+            this.playerBoards = new Array(gamestate.playerBoards.length) as PlayerBoard[];
+            for (let i = 0; i < this.playerBoards.length; i++) {
+                if (i == gamestate.activePlayer) {
+                    this.playerBoards[i] = new PlayerBoard(i, gamestate.playerBoards[i], move);
+                } else {
+                    this.playerBoards[i] = gamestate.playerBoards[i];
+                }
+            }
+
+            // gs.availableMoves = this.availableMoves.slice(0)
+            // gs.playedMoves = this.playedMoves;
+
+            this.nPlayers = gamestate.nPlayers;
+            this.firstTile = gamestate.firstTile;
+            this.round = gamestate.round;
+            this.turn = gamestate.turn;
+            this.activePlayer = gamestate.activePlayer;
+            this.startingPlayer = gamestate.startingPlayer;
+            this.previousPlayer = gamestate.previousPlayer;
+            this.state = gamestate.state;
+            this.seed = gamestate.seed;
+        } else {
+            this.factory = [];
+            this.playerBoards = [];
+            this.seed = Math.random().toString();
+        }
+    }
 
     /**
      * Starts a new game, new round, ready for first turn
@@ -395,6 +433,48 @@ export class GameState {
                 return pb;
             }
         });
+        // gs.availableMoves = this.availableMoves.slice(0)
+        // gs.playedMoves = this.playedMoves;
+
+        gs.nPlayers = this.nPlayers;
+        gs.firstTile = this.firstTile;
+        gs.round = this.round;
+        gs.turn = this.turn;
+        gs.activePlayer = this.activePlayer;
+        gs.startingPlayer = this.startingPlayer;
+        gs.previousPlayer = this.previousPlayer;
+        gs.state = this.state;
+        // gs.seed = this.seed;
+        return gs;
+    }
+
+    /**
+     * Creates a new gamestate, cloning the minimum possible properties from this
+     * @param move Move about to played to cloned gamestate
+     * @returns a cloned gamestate
+     */
+    tinyClone(move: Move): GameState {
+        const gs = new GameState();
+
+        // gs.tilebag = this.tilebag;
+        gs.factory = new Array(this.factory.length) as Tile[][];
+        for (let i = 0; i < this.factory.length; i++) {
+            if (i == move.factory || i == 0) {
+                gs.factory[i] = this.factory[i].slice(0);
+            } else {
+                gs.factory[i] = this.factory[i];
+            }
+        }
+
+        gs.playerBoards = new Array(this.playerBoards.length) as PlayerBoard[];
+        for (let i = 0; i < this.playerBoards.length; i++) {
+            if (i == this.activePlayer) {
+                gs.playerBoards[i] = this.playerBoards[i].tinyClone(move);
+            } else {
+                gs.playerBoards[i] = this.playerBoards[i];
+            }
+        }
+
         // gs.availableMoves = this.availableMoves.slice(0)
         // gs.playedMoves = this.playedMoves;
 

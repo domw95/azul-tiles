@@ -4,4 +4,6 @@ node_modules
 /benchmarks/**/*.d.ts
 /examples/**/*.js
 /examples/**/*.d.ts
+/performance/**/*.js
+/performance/**/*.d.ts
 /coverage

@@ -1,4 +1,4 @@
-import { Tile } from "./azul.js";
+import { Move, Tile } from "./azul.js";
 
 /**
  * Represents the Azul players board
@@ -12,26 +12,54 @@ export class PlayerBoard {
         [Tile.Red, Tile.Black, Tile.White, Tile.Blue, Tile.Yellow],
         [Tile.Yellow, Tile.Red, Tile.Black, Tile.White, Tile.Blue],
     ];
+    /** Scores of floor locations */
+    static floorScores: Array<number> = [-1, -1, -2, -2, -2, -3, -3];
+
     /** Wall to hold tiles */
-    wall: Array<Array<Tile>> = [[], [], [], [], []];
+    wall: Array<Array<Tile>>;
     /** Lines to place tiles into */
-    lines: Array<Array<Tile>> = [[], [], [], [], []];
+    lines: Array<Array<Tile>>;
     /** Floor for negative scoring tiles */
-    floor: Array<Tile> = [];
+    floor: Array<Tile>;
     /** Current score for player */
     score = 0;
     /** Expected score according to AI */
     expectedScore = 0;
     /** When the board was last updated */
     turnUpdated = -4;
-    /** Scores of floor locations */
-    static floorScores: Array<number> = [-1, -1, -2, -2, -2, -3, -3];
 
     /**
      *
      * @param id index of player in the game (0-3)
      */
-    constructor(public id: number) {}
+    constructor(public id: number, pb?: PlayerBoard, move?: Move) {
+        /** Initialise */
+
+        /** Clone if required */
+        if (pb !== undefined && move !== undefined) {
+            this.lines = new Array(5) as Tile[][];
+            // Only clone line that is changing
+            for (let i = 0; i < pb.lines.length; i++) {
+                if (move.line == i) {
+                    this.lines[i] = pb.lines[i].slice(0);
+                } else {
+                    this.lines[i] = pb.lines[i];
+                }
+            }
+
+            // Never clone wall as it does not change in turns
+            this.wall = pb.wall;
+            // Floor could change every turn
+            this.floor = pb.floor.slice(0);
+            this.score = pb.score;
+            this.expectedScore = pb.expectedScore;
+            this.turnUpdated = pb.turnUpdated;
+        } else {
+            this.wall = [[], [], [], [], []];
+            this.lines = [[], [], [], [], []];
+            this.floor = [];
+        }
+    }
 
     /**
      * Fills the wall with {@link Tile.Null}
@@ -53,6 +81,28 @@ export class PlayerBoard {
         const pb = new PlayerBoard(this.id);
         pb.lines = this.lines.map((line) => line.slice(0));
         pb.wall = this.wall.map((line) => line.slice(0));
+        pb.floor = this.floor.slice(0);
+        pb.score = this.score;
+        pb.expectedScore = this.expectedScore;
+        pb.turnUpdated = this.turnUpdated;
+        return pb;
+    }
+
+    tinyClone(move: Move): PlayerBoard {
+        const pb = new PlayerBoard(this.id);
+
+        // Only clone line that is changing
+        for (let i = 0; i < this.lines.length; i++) {
+            if (move.line == i) {
+                pb.lines[i] = this.lines[i].slice(0);
+            } else {
+                pb.lines[i] = this.lines[i];
+            }
+        }
+
+        // Never clone wall as it does not change in turns
+        pb.wall = this.wall;
+        // Floor could change every turn
         pb.floor = this.floor.slice(0);
         pb.score = this.score;
         pb.expectedScore = this.expectedScore;
