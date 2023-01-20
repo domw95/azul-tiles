@@ -1,5 +1,4 @@
-import { SearchMethod } from "minimaxer";
-import { AI, GameState, AIOpts, PruningType } from "../dist/index.js";
+import { GameState } from "../dist/index.js";
 
 // Create a game
 const game = new GameState();

@@ -2,7 +2,7 @@ import { PruningType, SearchMethod } from "minimaxer";
 import { PlayerCompare } from "../dist/ai/gameperf.js";
 import { AI, AIOpts, CloneMethod, EvalMethod } from "../dist/ai/players.js";
 let opts = new AIOpts();
-opts.timeout = 100;
+opts.timeout = 1000;
 opts.method = SearchMethod.TIME;
 opts.clone = CloneMethod.STANDARD;
 opts.genBased = true;
@@ -13,8 +13,8 @@ opts.pruning = PruningType.ALPHA_BETA;
 const player0 = new AI(0, opts);
 
 opts = structuredClone(opts);
-opts.eval = EvalMethod.GENERAL;
-// opts.clone = CloneMethod.SMART;
+// opts.eval = EvalMethod.GENERAL;
+opts.clone = CloneMethod.SMART;
 
 const player1 = new AI(1, opts);
 

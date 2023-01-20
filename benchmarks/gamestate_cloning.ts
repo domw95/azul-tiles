@@ -1,5 +1,5 @@
 import { GameState } from "../dist/state.js";
-import { add, complete, cycle, save, suite } from "benny";
+import { add, complete, cycle, suite } from "benny";
 
 const games = new Array(100).fill(new GameState()) as GameState[];
 games.forEach((game) => {
