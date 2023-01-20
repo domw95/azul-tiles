@@ -2,14 +2,7 @@ import * as minimax from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
 import { GameState } from "../state.js";
 import { getMovesCallback } from "./ai.js";
-import {
-    evalGamestateCallback,
-    evalGamestateCentre,
-    evalGamestateForecast,
-    evalGamestateNice0,
-    evalGamestateNice1,
-    evalValueQuick,
-} from "./evaluation.js";
+import { evalGamestateCallback, evalGamestateNice0, evalGamestateNice1 } from "./evaluation.js";
 import { createChildCallback, createChildSmartClone } from "./move_play.js";
 
 function printResult(result: minimax.NegamaxResult<Move>): void {
@@ -30,12 +23,6 @@ function printResult(result: minimax.NegamaxResult<Move>): void {
     );
 }
 
-export enum AIMode {
-    DEPTH,
-    TIME,
-    DEEPENING,
-}
-
 export const enum CloneMethod {
     STANDARD,
     SMART,
@@ -54,8 +41,6 @@ export class AIOpts extends minimax.NegamaxOpts {
     traverse = false;
     /** If `true` prints lots of interesting info to console */
     print = false;
-    /** Search mode to use */
-    mode = AIMode.TIME;
     /** Game state clone method to use */
     clone: CloneMethod = CloneMethod.STANDARD;
     /** How the gamestate should be evaluated */
@@ -74,7 +59,7 @@ export class AI implements PlayerInterface {
     name = "";
 
     /** Hold the current game tree */
-    tree: minimax.Negamax<GameState, Move> | undefined;
+    tree: minimax.Negamax<GameState, Move, unknown> | undefined;
 
     /**
      *
@@ -103,7 +88,7 @@ export class AI implements PlayerInterface {
         }
         let evalCallback = evalGamestateCallback;
         if (this.opts.eval == EvalMethod.CENTRE) {
-            evalCallback = evalGamestateCentre;
+            // evalCallback = evalGamestateCentre;
         } else if (this.opts.eval == EvalMethod.NICE) {
             if (this.id == 0) {
                 evalCallback = evalGamestateNice0;
@@ -111,22 +96,18 @@ export class AI implements PlayerInterface {
                 evalCallback = evalGamestateNice1;
             }
         } else if (this.opts.eval == EvalMethod.FORECAST) {
-            evalCallback = evalGamestateForecast;
+            // evalCallback = evalGamestateForecast;
         } else if (this.opts.evalQuick) {
-            evalCallback = evalValueQuick;
+            // evalCallback = evalValueQuick;
         }
-        const tree = new minimax.Negamax(
-            gamestate,
-            aim,
-            getMovesCallback,
-            childCallback,
-            evalCallback,
-            this.opts,
-        );
+        const tree = new minimax.Negamax(gamestate, aim, gamestate.availableMoves, this.opts);
+        tree.EvaluateNode = evalCallback;
+        tree.GetMoves = getMovesCallback;
+        tree.CreateChildNode = childCallback;
 
         if (this.opts.print) {
             tree.depthCallback = (
-                tree: minimax.Negamax<GameState, Move>,
+                tree: minimax.Negamax<GameState, Move, unknown>,
                 result: minimax.NegamaxResult<Move>,
             ): void => {
                 console.log("depth");
@@ -135,18 +116,7 @@ export class AI implements PlayerInterface {
         }
 
         // Get the result
-        let result: minimax.NegamaxResult<Move>;
-        switch (this.opts.mode) {
-            case AIMode.DEPTH:
-                result = tree.evalDepth();
-                break;
-            case AIMode.DEEPENING:
-                result = tree.evalDeepening();
-                break;
-            case AIMode.TIME:
-                result = tree.evalTime();
-                break;
-        }
+        const result = tree.evaluate();
         if (this.opts.print) {
             printResult(result);
         }

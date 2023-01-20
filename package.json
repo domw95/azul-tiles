@@ -9,11 +9,10 @@
         "test": "jest",
         "prebuild": "npm run lint",
         "build": "tsc",
-        "buildAll": "tsc && npm run buildExamples && npm run buildPerformance",
-        "buildExamples": "rm -rf examples/*js && npx tsc -p examples/",
-        "buildBenchmarks": "rm -rf benchmarks/*js && npx tsc -p benchmarks/",
-        "buildPerformance": "rm -rf performance/*js && npx tsc -p performance/",
-        "docs": "typedoc",
+        "build:examples": "npm run build && npx tsc -p examples/",
+        "build:benchmarks": "npm run build && npx tsc -p benchmarks/",
+        "build:performance": "npm run build && npx tsc -p performance/",
+        "build:docs": "typedoc",
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint .",
         "prepare": "npm run build",
@@ -52,7 +51,7 @@
     },
     "homepage": "https://github.com/domw95/azul-tiles#readme",
     "dependencies": {
-        "minimaxer": "^1.0.0",
+        "minimaxer": "^2.1.0",
         "seedrandom": "^3.0.5"
     }
 }
