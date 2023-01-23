@@ -266,35 +266,63 @@ export class GameState {
         // Clear list of possible moves
         this.availableMoves = [];
         // Go through all the factories
-        this.factory.forEach((factory, factoryid) => {
+        for (let factoryid = 0; factoryid < this.factory.length; factoryid++) {
             // for each tile available in factory
-            const uniquetiles = new Set(factory);
-            uniquetiles.forEach((tile) => {
+            const counts = [0, 0, 0, 0, 0];
+            for (const tile of this.factory[factoryid]) {
+                counts[tile] += 1;
+            }
+            for (let tile = 0; tile < 5; tile++) {
+                if (!counts[tile]) {
+                    continue;
+                }
                 // for each of the lines on the players board
-                this.playerBoards[this.activePlayer].lines.forEach((line, lineNumber) => {
-                    // check if tile already in wall of this type
-                    if (this.playerBoards[this.activePlayer].wall[lineNumber].includes(tile)) {
+                for (let lineNumber = 0; lineNumber < 5; lineNumber++) {
+                    // check if tile already in wall of gs type
+                    const line = this.playerBoards[this.activePlayer].lines[lineNumber];
+                    if (
+                        this.playerBoards[this.activePlayer].wall[lineNumber][
+                            PlayerBoard.wallLocations[lineNumber][tile]
+                        ] != Tile.Null
+                    ) {
                         // not a valid move
                         // Check if tile/s already in line
                     } else if (line.length > 0) {
                         // check if possible move tile matches current line
-                        if (line.length < lineNumber + 1 && line[0] == tile) {
+                        const space = lineNumber + 1 - line.length;
+                        if (space && line[0] == tile) {
                             // is a valid move, add to list
                             this.availableMoves.push(
-                                new Move(this.activePlayer, factoryid, tile, lineNumber),
+                                new Move(
+                                    this.activePlayer,
+                                    factoryid,
+                                    tile,
+                                    lineNumber,
+                                    counts[tile],
+                                    space <= counts[tile],
+                                ),
                             );
                         }
                     } else {
                         // No tiles in line, valid move
                         this.availableMoves.push(
-                            new Move(this.activePlayer, factoryid, tile, lineNumber),
+                            new Move(
+                                this.activePlayer,
+                                factoryid,
+                                tile,
+                                lineNumber,
+                                counts[tile],
+                                counts[tile] >= lineNumber + 1,
+                            ),
                         );
                     }
-                });
+                }
                 // also add a move straight to the floor
-                this.availableMoves.push(new Move(this.activePlayer, factoryid, tile, 5));
-            });
-        });
+                this.availableMoves.push(
+                    new Move(this.activePlayer, factoryid, tile, 5, counts[tile]),
+                );
+            }
+        }
     }
 
     /**
@@ -309,7 +337,6 @@ export class GameState {
         this.playedMoves.push(move);
         const pb = this.playerBoards[move.player];
         // get the tiles from the factory
-        const tiles = this.factory[move.factory].filter((tile) => tile == move.tile);
         const discardtiles = this.factory[move.factory].filter((tile) => tile != move.tile);
 
         // if centre, set new tilelist
@@ -330,21 +357,20 @@ export class GameState {
         }
 
         // add each of the picked up tiles to players board
-        tiles.forEach((tile) => {
-            // check if straight to floor
-            if (move.line == 5) {
-                pb.floor.push(tile);
-            } else {
+        if (move.line != 5) {
+            for (let i = 0; i < move.count; i++) {
                 const length = pb.lines[move.line].length;
-                // check if space to append and corret type
-                if (length == 0 || (length < move.line + 1 && pb.lines[move.line][0] == tile)) {
-                    pb.lines[move.line].push(tile);
+                if (length <= move.line) {
+                    pb.lines[move.line].push(move.tile);
                 } else {
-                    pb.floor.push(tile);
+                    pb.floor.push(move.tile);
                 }
             }
-        });
-
+        } else {
+            for (let i = 0; i < move.count; i++) {
+                pb.floor.push(move.tile);
+            }
+        }
         this.state = State.turnEnd;
     }
 

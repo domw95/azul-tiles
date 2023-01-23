@@ -3,6 +3,9 @@ import { add, complete, cycle, suite } from "benny";
 import { Move, PlayerBoard, Tile } from "../dist/index.js";
 
 const games = new Array(100).fill(new GameState()) as GameState[];
+games.forEach((game) => {
+    game.newGame(2);
+});
 
 function original(gs: GameState) {
     // Clear list of possible moves
@@ -121,6 +124,9 @@ function getMoveForWithCount(gs: GameState) {
             counts[tile] += 1;
         }
         for (let tile = 0; tile < 5; tile++) {
+            if (!counts[tile]) {
+                continue;
+            }
             // for each of the lines on the players board
             for (let lineNumber = 0; lineNumber < 5; lineNumber++) {
                 // check if tile already in wall of gs type
@@ -160,6 +166,9 @@ function getMoveForWithCountTileCheck(gs: GameState) {
             counts[tile] += 1;
         }
         for (let tile = 0; tile < 5; tile++) {
+            if (!counts[tile]) {
+                continue;
+            }
             // for each of the lines on the players board
             for (let lineNumber = 0; lineNumber < 5; lineNumber++) {
                 // check if tile already in wall of gs type
@@ -204,11 +213,18 @@ function getMoveForWithCountFull(gs: GameState) {
             counts[tile] += 1;
         }
         for (let tile = 0; tile < 5; tile++) {
+            if (!counts[tile]) {
+                continue;
+            }
             // for each of the lines on the players board
             for (let lineNumber = 0; lineNumber < 5; lineNumber++) {
                 // check if tile already in wall of gs type
                 const line = gs.playerBoards[gs.activePlayer].lines[lineNumber];
-                if (gs.playerBoards[gs.activePlayer].wall[lineNumber].includes(tile)) {
+                if (
+                    gs.playerBoards[gs.activePlayer].wall[lineNumber][
+                        PlayerBoard.wallLocations[lineNumber][tile]
+                    ] != Tile.Null
+                ) {
                     // not a valid move
                     // Check if tile/s already in line
                 } else if (line.length > 0) {
@@ -223,7 +239,7 @@ function getMoveForWithCountFull(gs: GameState) {
                                 tile,
                                 lineNumber,
                                 counts[tile],
-                                space == counts[tile],
+                                space <= counts[tile],
                             ),
                         );
                     }
@@ -236,7 +252,7 @@ function getMoveForWithCountFull(gs: GameState) {
                             tile,
                             lineNumber,
                             counts[tile],
-                            counts[tile] == lineNumber + 1,
+                            counts[tile] >= lineNumber + 1,
                         ),
                     );
                 }

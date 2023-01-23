@@ -2,7 +2,7 @@ import { PruningType, SearchMethod } from "minimaxer";
 import { PlayerCompare } from "../dist/ai/gameperf.js";
 import { AI, AIOpts, CloneMethod, EvalMethod } from "../dist/ai/players.js";
 let opts = new AIOpts();
-opts.timeout = 1000;
+opts.timeout = 100;
 opts.method = SearchMethod.TIME;
 opts.clone = CloneMethod.STANDARD;
 opts.genBased = true;
