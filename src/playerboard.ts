@@ -241,15 +241,15 @@ export function wallScore(wall: Array<Array<Tile>>): number {
 
     // column scores
     for (let col = 0; col < 5; col++) {
+        let full = true;
         for (let row = 0; row < 5; row++) {
-            let full = true;
             if (wall[row][col] == Tile.Null) {
                 full = false;
                 break;
             }
-            if (full) {
-                score += 7;
-            }
+        }
+        if (full) {
+            score += 7;
         }
     }
 
