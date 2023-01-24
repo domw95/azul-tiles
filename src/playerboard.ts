@@ -25,12 +25,16 @@ export class PlayerBoard {
 
     /** Wall to hold tiles */
     wall: Array<Array<Tile>>;
+    /** Wall to hold tiles that will move there at the end of the round*/
+    shadowWall: Array<Array<Tile>>;
     /** Lines to place tiles into */
     lines: Array<Array<Tile>>;
     /** Floor for negative scoring tiles */
     floor: Array<Tile>;
     /** Current score for player */
     score = 0;
+    /** Score in round up to this point */
+    roundScore = 0;
     /** Expected score according to AI */
     expectedScore = 0;
     /** When the board was last updated */
@@ -46,12 +50,15 @@ export class PlayerBoard {
         /** Clone if required */
         if (pb !== undefined && move !== undefined) {
             this.lines = new Array(5) as Tile[][];
-            // Only clone line that is changing
+            this.shadowWall = new Array(5) as Tile[][];
+            // Only clone line and shadow wall that is changing
             for (let i = 0; i < pb.lines.length; i++) {
                 if (move.line == i) {
                     this.lines[i] = pb.lines[i].slice(0);
+                    this.shadowWall[i] = pb.shadowWall[i].slice(0);
                 } else {
                     this.lines[i] = pb.lines[i];
+                    this.shadowWall[i] = pb.shadowWall[i];
                 }
             }
 
@@ -62,8 +69,10 @@ export class PlayerBoard {
             this.score = pb.score;
             this.expectedScore = pb.expectedScore;
             this.turnUpdated = pb.turnUpdated;
+            this.roundScore = pb.roundScore;
         } else {
             this.wall = [[], [], [], [], []];
+            this.shadowWall = [[], [], [], [], []];
             this.lines = [[], [], [], [], []];
             this.floor = [];
         }
@@ -77,6 +86,7 @@ export class PlayerBoard {
         for (let i = 0; i < 5; i++) {
             for (let j = 0; j < 5; j++) {
                 this.wall[i][j] = Tile.Null;
+                this.shadowWall[i][j] = Tile.Null;
             }
         }
     }
@@ -89,10 +99,12 @@ export class PlayerBoard {
         const pb = new PlayerBoard(this.id);
         pb.lines = this.lines.map((line) => line.slice(0));
         pb.wall = this.wall.map((line) => line.slice(0));
+        pb.shadowWall = this.shadowWall.map((line) => line.slice(0));
         pb.floor = this.floor.slice(0);
         pb.score = this.score;
         pb.expectedScore = this.expectedScore;
         pb.turnUpdated = this.turnUpdated;
+        pb.roundScore = this.roundScore;
         return pb;
     }
 
@@ -107,6 +119,7 @@ export class PlayerBoard {
                 pb.lines[i] = this.lines[i];
             }
         }
+        pb.shadowWall = this.shadowWall.map((line) => line.slice(0));
 
         // Never clone wall as it does not change in turns
         pb.wall = this.wall;
@@ -115,6 +128,7 @@ export class PlayerBoard {
         pb.score = this.score;
         pb.expectedScore = this.expectedScore;
         pb.turnUpdated = this.turnUpdated;
+        pb.roundScore = this.roundScore;
         return pb;
     }
 }
