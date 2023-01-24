@@ -152,10 +152,8 @@ export function moveToWall(pb: PlayerBoard, wall: Array<Array<Tile>>): number {
     for (let lineindex = 0; lineindex < 5; lineindex++) {
         // check if line is full
         if (pb.lines[lineindex].length == lineindex + 1) {
-            // find where tile would go on wall
-            const tile = pb.lines[lineindex][0];
             // Place on wall
-            score += placeOnWall(tile, lineindex, wall);
+            score += placeOnWall(pb.lines[lineindex][0], lineindex, wall);
         }
     }
     // check floor score
