@@ -1,6 +1,6 @@
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
-import { PlayerBoard, moveToWall, wallScore } from "./playerboard.js";
+import { PlayerBoard, moveToWall, wallScore, placeOnWall } from "./playerboard.js";
 
 /** Tracks state of the game */
 export enum State {
@@ -179,7 +179,7 @@ export class GameState {
         // get list of moves
         this.getMoves();
 
-        // if no moves left, finish rund
+        // if no moves left, finish round
         if (this.availableMoves.length == 0) {
             // set activeplayer and turn back to previous
             // this.turn--;
@@ -224,6 +224,8 @@ export class GameState {
                 }
             });
             pb.floor = [];
+            pb.roundScore = 0;
+            pb.roundColUpdate = [-1, -1, -1, -1, -1];
         });
 
         // check for end condition, otherwise next round
@@ -331,10 +333,11 @@ export class GameState {
      *  Spare tiles may go to centre factory.
      * @param move Valid move from {@link GameState.availableMoves} that is applied to the game
      */
-    playMove(move: Move): void {
+    playMove(move: Move): number {
         if (this.state != State.turn || this.activePlayer != move.player) {
             throw Error("Invalid state for this move");
         }
+        let score = 0;
         this.playedMoves.push(move);
         const pb = this.playerBoards[move.player];
         // get the tiles from the factory
@@ -346,6 +349,7 @@ export class GameState {
             // add firstplayer tile if required.
             if (this.firstTile == Tile.FirstPlayer) {
                 pb.floor.push(Tile.FirstPlayer);
+                score -= 1;
                 this.firstTile = Tile.Null;
             }
         } else {
@@ -365,14 +369,35 @@ export class GameState {
                     pb.lines[move.line].push(move.tile);
                 } else {
                     pb.floor.push(move.tile);
+                    if (pb.floor.length < 8) {
+                        score += PlayerBoard.floorScores[pb.floor.length - 1];
+                    }
                 }
             }
         } else {
             for (let i = 0; i < move.count; i++) {
                 pb.floor.push(move.tile);
+                if (pb.floor.length < 8) {
+                    score += PlayerBoard.floorScores[pb.floor.length - 1];
+                }
             }
         }
+
+        // Play shadow wall move if line is full
+        if (move.full) {
+            // Clear played tiles on shadow wall
+            for (let row = 0; row < 5; row++) {
+                if (pb.lines[row].length == row + 1) {
+                    // clear shadow tile
+                    const col = PlayerBoard.wallLocations[row][pb.lines[row][0]];
+                    pb.shadowWall[row][col] = Tile.Null;
+                }
+            }
+            score = moveToWall(pb, pb.shadowWall) - pb.roundScore;
+        }
+        pb.roundScore += score;
         this.state = State.turnEnd;
+        return score;
     }
 
     /**
