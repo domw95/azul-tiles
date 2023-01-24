@@ -22,6 +22,7 @@ export class PlayerBoard {
     ];
     /** Scores of floor locations */
     static floorScores: Array<number> = [-1, -1, -2, -2, -2, -3, -3];
+    // static floorScores: Array<number> = [0, 0, 0, 0, 0, 0, 0];
 
     /** Wall to hold tiles */
     wall: Array<Array<Tile>>;
@@ -35,6 +36,8 @@ export class PlayerBoard {
     score = 0;
     /** Score in round up to this point */
     roundScore = 0;
+    /** Tracks the max row of each colum has been updated this round */
+    roundColUpdate = [-1, -1, -1, -1, -1];
     /** Expected score according to AI */
     expectedScore = 0;
     /** When the board was last updated */
@@ -169,7 +172,8 @@ export function moveToWall(pb: PlayerBoard, wall: Array<Array<Tile>>): number {
 /** Places tile on wall at lineindex, returning the score from it */
 export function placeOnWall(tile: Tile, lineindex: number, wall: Array<Array<Tile>>): number {
     let score = 0;
-    const colindex = PlayerBoard.wallTypes[lineindex].indexOf(tile);
+    // const colindex = PlayerBoard.wallTypes[lineindex].indexOf(tile);
+    const colindex = PlayerBoard.wallLocations[lineindex][tile];
     // place tile in wall
     wall[lineindex][colindex] = tile;
     // check horizontal scores

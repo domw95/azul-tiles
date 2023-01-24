@@ -1,4 +1,4 @@
-import { GameState, printGame, Tile } from "../dist/index.js";
+import { GameState, PlayerBoard, printGame, Tile } from "../dist/index.js";
 import { State } from "../dist/state.js";
 
 // Check each available move to ensure they are legit
@@ -41,6 +41,11 @@ function validate_gamestate(gs: GameState) {
     expect(count).toEqual([20, 20, 20, 20, 20, 1]);
 }
 
+//  Call at end of round to check wall, lines, scores etc
+function validate_playerboard(pb: PlayerBoard) {
+    expect(pb.wall).toEqual(pb.shadowWall);
+}
+
 test("Gamestate game", () => {
     for (let n = 2; n < 5; n++) {
         // Initialise game
@@ -71,12 +76,15 @@ test("Gamestate game", () => {
             expect(gs.state).toBe(State.turnEnd);
             if (!gs.nextTurn()) {
                 expect(gs.state).toBe(State.endOfTurns);
+                validate_gamestate(gs);
                 if (!gs.endRound()) {
                     expect(gs.state).toBe(State.gameEnd);
-
+                    gs.playerBoards.forEach((pb) => validate_playerboard(pb));
                     break;
                 } else {
+                    // Round ended, start of next
                     expect(gs.state).toBe(State.turn);
+                    gs.playerBoards.forEach((pb) => validate_playerboard(pb));
                 }
             } else {
                 expect(gs.state).toBe(State.turn);

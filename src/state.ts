@@ -179,7 +179,7 @@ export class GameState {
         // get list of moves
         this.getMoves();
 
-        // if no moves left, finish rund
+        // if no moves left, finish round
         if (this.availableMoves.length == 0) {
             // set activeplayer and turn back to previous
             // this.turn--;
@@ -224,8 +224,8 @@ export class GameState {
                 }
             });
             pb.floor = [];
-            console.log("Round score", pb.roundScore);
             pb.roundScore = 0;
+            pb.roundColUpdate = [-1, -1, -1, -1, -1];
         });
 
         // check for end condition, otherwise next round
@@ -333,7 +333,7 @@ export class GameState {
      *  Spare tiles may go to centre factory.
      * @param move Valid move from {@link GameState.availableMoves} that is applied to the game
      */
-    playMove(move: Move): void {
+    playMove(move: Move): number {
         if (this.state != State.turn || this.activePlayer != move.player) {
             throw Error("Invalid state for this move");
         }
@@ -385,13 +385,19 @@ export class GameState {
 
         // Play shadow wall move if line is full
         if (move.full) {
-            score += placeOnWall(move.tile, move.line, pb.shadowWall);
+            // Clear played tiles on shadow wall
+            for (let row = 0; row < 5; row++) {
+                if (pb.lines[row].length == row + 1) {
+                    // clear shadow tile
+                    const col = PlayerBoard.wallLocations[row][pb.lines[row][0]];
+                    pb.shadowWall[row][col] = Tile.Null;
+                }
+            }
+            score = moveToWall(pb, pb.shadowWall) - pb.roundScore;
         }
         pb.roundScore += score;
-        if (this.availableMoves.length) {
-            console.log("Score", score);
-        }
         this.state = State.turnEnd;
+        return score;
     }
 
     /**
