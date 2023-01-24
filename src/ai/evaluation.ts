@@ -1,26 +1,77 @@
 // A bunch of different function to evaluate a game state
-import * as minimax from "minimaxer";
-import { Move } from "../azul.js";
+import { Move, Tile } from "../azul.js";
+import { PlayerBoard } from "../playerboard.js";
 import { GameState } from "../state.js";
 
-/** Simplest gamestate evaluation function */
-export const evalGamestateCallback: minimax.EvaluateNodeFunc<GameState, Move, unknown> = (
-    node: minimax.Node<GameState, Move, unknown>,
-) => {
-    return node.gamestate.evalScore(0) - node.gamestate.evalScore(1);
-};
+/**
+ * Object for configuring how the main evaluation function performs
+ */
+export class EvalConfig {
+    /** If `false`, evaluate each player board every move, if `true` only update when required */
+    quickEval = false;
+    /** Enable the centre weighting value */
+    centre = 0;
+    /** Value of having the first player tile */
+    firstTileValue = 0;
+    /** Multiplier for number of tiles in move */
+    tileCountValue = 0;
+    /** Multiplier for line number (1 to 5) */
+    lineValue = 0;
+    /** Remove moves that go direct to floor in the early turns and rounds*/
+    movePruning = false;
+    /** Don't consider the opponents score when evaluating */
+    friendly = false;
+}
 
-/** Nice evaluation function, only cares about its own score */
-export const evalGamestateNice0: minimax.EvaluateNodeFunc<GameState, Move, unknown> = (
-    node: minimax.Node<GameState, Move, unknown>,
-) => {
-    return node.gamestate.evalScore(0);
-};
-export const evalGamestateNice1: minimax.EvaluateNodeFunc<GameState, Move, unknown> = (
-    node: minimax.Node<GameState, Move, unknown>,
-) => {
-    return -node.gamestate.evalScore(1);
-};
+/** Returns a value of the gamestate for the player based on config and just played move */
+export function evaluate(
+    gamestate: GameState,
+    move: Move | undefined,
+    player: number,
+    config: EvalConfig,
+) {
+    let value = 0;
+    // First player value
+    if (gamestate.playerBoards[player].floor[0] == Tile.FirstPlayer && gamestate.round < 4) {
+        value += config.firstTileValue;
+    }
+
+    if (move !== undefined && move?.line != 5) {
+        // Tile count value
+        value += config.tileCountValue * move.count;
+        // Line value
+        value += config.lineValue * (move.line + 1);
+    }
+    // Playing pieces towards centre
+    if (config.centre && gamestate.round < 2) {
+        value += config.centre * centreEvaluation(gamestate.playerBoards[player].shadowWall);
+    }
+
+    return currentScore(gamestate.playerBoards[player]) + value;
+}
+
+function currentScore(pb: PlayerBoard) {
+    return Math.max(0, pb.score + pb.roundScore + pb.bonusScore);
+}
+
+const CENTRE_WEIGHTS = [
+    [0.95, 0.96, 0.97, 0.96, 0.95],
+    [0.96, 0.97, 0.98, 0.97, 0.96],
+    [0.97, 0.98, 0.99, 0.98, 0.97],
+    [0.96, 0.97, 0.98, 0.97, 0.96],
+    [0.95, 0.96, 0.97, 0.96, 0.95],
+];
+function centreEvaluation(wall: Tile[][]): number {
+    let value = 0;
+    for (let row = 0; row < 5; row++) {
+        for (let col = 0; col < 5; col++) {
+            if (wall[row][col] != Tile.Null) {
+                value += CENTRE_WEIGHTS[row][col];
+            }
+        }
+    }
+    return value;
+}
 
 // /** Centre based evaluation function  */
 // export const evalGamestateCentre: minimax.EvaluateGamestateFunc<GameState> = (

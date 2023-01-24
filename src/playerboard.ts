@@ -36,8 +36,8 @@ export class PlayerBoard {
     score = 0;
     /** Score in round up to this point */
     roundScore = 0;
-    /** Tracks the max row of each colum has been updated this round */
-    roundColUpdate = [-1, -1, -1, -1, -1];
+    /** Score from rows, columns and colours that will be achieved based on current state */
+    bonusScore = 0;
     /** Expected score according to AI */
     expectedScore = 0;
     /** When the board was last updated */

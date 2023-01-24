@@ -15,9 +15,13 @@ export const createChildCallback: minimax.CreateChildNodeFunc<GameState, Move, u
     const new_gamestate = parent.gamestate.clone();
     new_gamestate.playMove(move);
     if (!new_gamestate.nextTurn()) {
-        return new minimax.Node(minimax.NodeType.LEAF, new_gamestate, move);
+        const node = new minimax.Node(minimax.NodeType.LEAF, new_gamestate, move);
+        node.moves = new_gamestate.availableMoves;
+        return node;
     } else {
-        return new minimax.Node(minimax.NodeType.INNER, new_gamestate, move);
+        const node = new minimax.Node(minimax.NodeType.INNER, new_gamestate, move);
+        node.moves = new_gamestate.availableMoves;
+        return node;
     }
 };
 
@@ -29,9 +33,13 @@ export const createChildSmartClone: minimax.CreateChildNodeFunc<GameState, Move,
     const new_gamestate = parent.gamestate.smartClone(move);
     new_gamestate.playMove(move);
     if (!new_gamestate.nextTurn()) {
-        return new minimax.Node(minimax.NodeType.LEAF, new_gamestate, move);
+        const node = new minimax.Node(minimax.NodeType.LEAF, new_gamestate, move);
+        node.moves = new_gamestate.availableMoves;
+        return node;
     } else {
-        return new minimax.Node(minimax.NodeType.INNER, new_gamestate, move);
+        const node = new minimax.Node(minimax.NodeType.INNER, new_gamestate, move);
+        node.moves = new_gamestate.availableMoves;
+        return node;
     }
 };
 

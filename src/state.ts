@@ -225,7 +225,7 @@ export class GameState {
             });
             pb.floor = [];
             pb.roundScore = 0;
-            pb.roundColUpdate = [-1, -1, -1, -1, -1];
+            pb.bonusScore = 0;
         });
 
         // check for end condition, otherwise next round
@@ -394,6 +394,7 @@ export class GameState {
                 }
             }
             score = moveToWall(pb, pb.shadowWall) - pb.roundScore;
+            pb.bonusScore = wallScore(pb.shadowWall);
         }
         pb.roundScore += score;
         this.state = State.turnEnd;

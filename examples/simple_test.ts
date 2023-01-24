@@ -1,5 +1,5 @@
 import { PruningType, SearchMethod } from "minimaxer";
-import { AI, AIOpts, CloneMethod, GameState, Move } from "../dist/index.js";
+import { AI, AIOpts, GameState, Move } from "../dist/index.js";
 
 // Create a game
 const game = new GameState();
@@ -9,7 +9,6 @@ opts.method = SearchMethod.TIME;
 opts.presort = true;
 opts.pruning = PruningType.ALPHA_BETA;
 opts.timeout = 100;
-opts.clone = CloneMethod.SMART;
 const player = new AI(0, opts);
 
 for (let i = 0; ; i++) {

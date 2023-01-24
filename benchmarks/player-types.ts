@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { add, complete, cycle, save, suite } from "benny";
 import { SearchMethod } from "minimaxer";
-import { AI, AIOpts, EvalMethod, GameState } from "../dist/index.js";
+import { AI, AIOpts, GameState } from "../dist/index.js";
+import { EvalConfig } from "../dist/ai/evaluation.js";
 
 // Time how long it takes to evaluate a start position to depth 3
 
@@ -13,7 +14,7 @@ function firstMove(opts: AIOpts): void {
     game.nextTurn();
     game.playMove(game.availableMoves[0]);
     game.nextTurn();
-    opts.depth = 3;
+    opts.depth = 2;
     opts.method = SearchMethod.DEEPENING;
     const player = new AI(1, opts);
     player.getMove(game);
@@ -27,10 +28,28 @@ void suite(
         opts.optimal = true;
         firstMove(opts);
     }),
-    add("General player", () => {
+    add("Quick eval", () => {
         const opts = new AIOpts();
         opts.optimal = true;
-        opts.eval = EvalMethod.GENERAL;
+        opts.config.quickEval = true;
+
+        firstMove(opts);
+    }),
+
+    add("Move prune", () => {
+        const opts = new AIOpts();
+        opts.optimal = true;
+        opts.config.movePruning = true;
+
+        firstMove(opts);
+    }),
+
+    add("Quick eval + Move prune", () => {
+        const opts = new AIOpts();
+        opts.optimal = true;
+        opts.config.quickEval = true;
+        opts.config.movePruning = true;
+
         firstMove(opts);
     }),
 
