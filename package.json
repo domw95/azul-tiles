@@ -6,7 +6,7 @@
     "types": "dist/index.d.ts",
     "type": "module",
     "scripts": {
-        "test": "jest",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
         "prebuild": "npm run lint",
         "build": "tsc",
         "build:examples": "npm run build && npx tsc -p examples/",

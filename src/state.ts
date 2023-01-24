@@ -143,6 +143,7 @@ export class GameState {
                 }
             }
         });
+        this.tilebag = this.tilebag.filter((tile) => tile != Tile.Null);
         // set players turn
         // this.activePlayer = (this.round + this.startingPlayer) % this.nPlayers;
         // this.previousPlayer = (this.round + this.startingPlayer - 1) % this.nPlayers;
