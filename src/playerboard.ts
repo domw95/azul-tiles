@@ -149,21 +149,19 @@ export function moveToWall(pb: PlayerBoard, wall: Array<Array<Tile>>): number {
     // used for evaluation and end of round
     let score = 0;
 
-    pb.lines.forEach((line, lineindex) => {
+    for (let lineindex = 0; lineindex < 5; lineindex++) {
         // check if line is full
-        if (line.length == lineindex + 1) {
+        if (pb.lines[lineindex].length == lineindex + 1) {
             // find where tile would go on wall
-            const tile = line[0];
+            const tile = pb.lines[lineindex][0];
             // Place on wall
             score += placeOnWall(tile, lineindex, wall);
         }
-    });
+    }
     // check floor score
-    pb.floor.forEach((tile, i) => {
-        if (i < PlayerBoard.floorScores.length) {
-            score += PlayerBoard.floorScores[i];
-        }
-    });
+    for (let i = 0; i < pb.floor.length && i < PlayerBoard.floorScores.length; i++) {
+        score += PlayerBoard.floorScores[i];
+    }
 
     // check if horizontal is complete
     return score;
