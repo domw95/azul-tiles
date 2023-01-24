@@ -1,6 +1,6 @@
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
-import { PlayerBoard, moveToWall, wallScore } from "./playerboard.js";
+import { PlayerBoard, moveToWall, wallScore, placeOnWall } from "./playerboard.js";
 
 /** Tracks state of the game */
 export enum State {
@@ -224,6 +224,8 @@ export class GameState {
                 }
             });
             pb.floor = [];
+            console.log("Round score", pb.roundScore);
+            pb.roundScore = 0;
         });
 
         // check for end condition, otherwise next round
@@ -335,6 +337,7 @@ export class GameState {
         if (this.state != State.turn || this.activePlayer != move.player) {
             throw Error("Invalid state for this move");
         }
+        let score = 0;
         this.playedMoves.push(move);
         const pb = this.playerBoards[move.player];
         // get the tiles from the factory
@@ -346,6 +349,7 @@ export class GameState {
             // add firstplayer tile if required.
             if (this.firstTile == Tile.FirstPlayer) {
                 pb.floor.push(Tile.FirstPlayer);
+                score -= 1;
                 this.firstTile = Tile.Null;
             }
         } else {
@@ -365,12 +369,27 @@ export class GameState {
                     pb.lines[move.line].push(move.tile);
                 } else {
                     pb.floor.push(move.tile);
+                    if (pb.floor.length < 8) {
+                        score += PlayerBoard.floorScores[pb.floor.length - 1];
+                    }
                 }
             }
         } else {
             for (let i = 0; i < move.count; i++) {
                 pb.floor.push(move.tile);
+                if (pb.floor.length < 8) {
+                    score += PlayerBoard.floorScores[pb.floor.length - 1];
+                }
             }
+        }
+
+        // Play shadow wall move if line is full
+        if (move.full) {
+            score += placeOnWall(move.tile, move.line, pb.shadowWall);
+        }
+        pb.roundScore += score;
+        if (this.availableMoves.length) {
+            console.log("Score", score);
         }
         this.state = State.turnEnd;
     }
