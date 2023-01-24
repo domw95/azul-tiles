@@ -168,7 +168,6 @@ export function moveToWall(pb: PlayerBoard, wall: Array<Array<Tile>>): number {
 /** Places tile on wall at lineindex, returning the score from it */
 export function placeOnWall(tile: Tile, lineindex: number, wall: Array<Array<Tile>>): number {
     let score = 0;
-    // const colindex = PlayerBoard.wallTypes[lineindex].indexOf(tile);
     const colindex = PlayerBoard.wallLocations[lineindex][tile];
     // place tile in wall
     wall[lineindex][colindex] = tile;
@@ -227,44 +226,50 @@ export function placeOnWall(tile: Tile, lineindex: number, wall: Array<Array<Til
 export function wallScore(wall: Array<Array<Tile>>): number {
     let score = 0;
     // row scores
-    wall.forEach((row) => {
-        // check if full row
-        if (row.filter((x) => x != Tile.Null).length == 5) {
+    for (let row = 0; row < 5; row++) {
+        let full = true;
+        for (let col = 0; col < 5; col++) {
+            if (wall[row][col] == Tile.Null) {
+                full = false;
+                break;
+            }
+        }
+        if (full) {
             score += 2;
         }
-    });
+    }
 
     // column scores
-    for (let j = 0; j < 5; j++) {
-        for (let i = 0; i < 5; i++) {
-            if (wall[i][j] == Tile.Null) {
+    for (let col = 0; col < 5; col++) {
+        for (let row = 0; row < 5; row++) {
+            let full = true;
+            if (wall[row][col] == Tile.Null) {
+                full = false;
                 break;
-            } else if (i == 4) {
+            }
+            if (full) {
                 score += 7;
             }
         }
     }
 
-    // colour scores
-    [Tile.Red, Tile.Yellow, Tile.Black, Tile.Blue, Tile.White].forEach((tile) => {
-        // go through to find wall positions
-        let fail = false;
-        for (let i = 0; i < 5; i++) {
-            for (let j = 0; j < 5; j++) {
-                if (PlayerBoard.wallTypes[i][j] == tile) {
-                    if (wall[i][j] != tile) {
-                        fail = true;
-                        break;
-                    }
-                }
-            }
-            if (fail) {
+    //  For each tile
+    for (let t = 0; t < 5; t++) {
+        // For each row
+        let full = true;
+        for (let row = 0; row < 5; row++) {
+            // Check if tile in wall
+            if (
+                wall[row][PlayerBoard.wallLocations[row][PlayerBoard.wallTypes[0][t]]] == Tile.Null
+            ) {
+                full = false;
                 break;
             }
         }
-        if (!fail) {
+        if (full) {
             score += 10;
         }
-    });
+    }
+
     return score;
 }
