@@ -1,6 +1,6 @@
 import seedrandom from "seedrandom";
 import { Move, Tile } from "./azul.js";
-import { PlayerBoard, moveToWall, wallScore, placeOnWall } from "./playerboard.js";
+import { PlayerBoard, moveToWall, wallScore } from "./playerboard.js";
 
 /** Tracks state of the game */
 export enum State {

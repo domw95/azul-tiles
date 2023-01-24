@@ -1,4 +1,4 @@
-import { GameState, PlayerBoard, printGame, Tile } from "../dist/index.js";
+import { GameState, PlayerBoard, Tile } from "../dist/index.js";
 import { State } from "../dist/state.js";
 
 // Check each available move to ensure they are legit

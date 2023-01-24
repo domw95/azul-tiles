@@ -1,5 +1,4 @@
-import { GameState, printGame, Tile } from "../dist/index.js";
-import { State } from "../dist/state.js";
+import { GameState } from "../dist/index.js";
 
 test("Game scoring", () => {
     // Create a new game

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { add, complete, cycle, save, suite } from "benny";
+import { add, complete, cycle, suite } from "benny";
 import { SearchMethod } from "minimaxer";
 import { AI, AIOpts, GameState } from "../dist/index.js";
-import { EvalConfig } from "../dist/ai/evaluation.js";
 
 // Time how long it takes to evaluate a start position to depth 3
 
