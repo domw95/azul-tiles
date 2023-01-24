@@ -1,0 +1,8 @@
+{
+    "jest.rootPath": "src",
+    "jest.nodeEnv": {
+        "NODE_OPTIONS": "--experimental-vm-modules"
+    },
+    "jest.jestCommandLine": "npm run build && npx jest --silet=false",
+    "jest.autoRun": "off"
+}

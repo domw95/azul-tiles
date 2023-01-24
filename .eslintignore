@@ -1,7 +1,5 @@
 /dist
 /docs
-/examples
-/performance
-/*.js
-/*.cjs
-/*.ts
+**.js
+**.cjs
+**.d.ts

@@ -1,11 +1,9 @@
 /*
- * For a detailed explanation regarding each configuration property and type check, visit:
+ * For a detailed explanation regarding each configuration property, visit:
  * https://jestjs.io/docs/configuration
  */
 
-export default {
-    preset: "ts-jest/presets/default-esm",
-    testEnvironment: "node",
+module.exports = {
     // All imported modules in your tests should be mocked automatically
     // automock: false,
 
@@ -19,7 +17,7 @@ export default {
     // clearMocks: false,
 
     // Indicates whether the coverage information should be collected while executing the test
-    // collectCoverage: false,
+    collectCoverage: true,
 
     // An array of glob patterns indicating a set of files for which coverage information should be collected
     // collectCoverageFrom: undefined,
@@ -52,6 +50,8 @@ export default {
     // Make calling deprecated APIs throw helpful error messages
     // errorOnDeprecated: false,
 
+    extensionsToTreatAsEsm: [".ts"],
+
     // The default configuration for fake timers
     // fakeTimers: {
     //   "enableGlobally": false
@@ -78,19 +78,12 @@ export default {
     // ],
 
     // An array of file extensions your modules use
-    // moduleFileExtensions: [
-    //   "js",
-    //   "mjs",
-    //   "cjs",
-    //   "jsx",
-    //   "ts",
-    //   "tsx",
-    //   "json",
-    //   "node"
-    // ],
+    moduleFileExtensions: ["js", "mjs", "cjs", "jsx", "ts", "tsx", "json", "node"],
 
     // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-    // moduleNameMapper: {},
+    moduleNameMapper: {
+        "^(\\.{1,2}/.*)\\.js$": "$1",
+    },
 
     // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
     // modulePathIgnorePatterns: [],
@@ -155,7 +148,7 @@ export default {
     // testLocationInResults: false,
 
     // The glob patterns Jest uses to detect test files
-    // testMatch: ["**/tests/**/*.[jt]s?(x)"],
+    testMatch: ["**/tests/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[tj]s?(x)"],
 
     // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
     // testPathIgnorePatterns: [
@@ -172,7 +165,14 @@ export default {
     // testRunner: "jest-circus/runner",
 
     // A map from regular expressions to paths to transformers
-    // transform: undefined,
+    transform: {
+        "^.+\\.ts?$": [
+            "ts-jest",
+            {
+                useESM: true,
+            },
+        ],
+    },
 
     // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
     // transformIgnorePatterns: [

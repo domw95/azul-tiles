@@ -23,6 +23,8 @@ export class Move {
         public factory: number,
         public tile: Tile,
         public line: number,
+        public count = 0,
+        public full = false,
     ) {}
 }
 

@@ -23,11 +23,11 @@ export class GameState {
     /** Holds all the tiles which are dealt to factories */
     tilebag: Array<Tile> = [];
     /** Array of factories to hold tiles. Factory[0] is centre */
-    factory: Array<Array<Tile>> = [];
+    factory: Array<Array<Tile>>;
     /** If equal to  {@link azul.Tile.FirstPlayer}, first player tile is in centre*/
     firstTile: Tile = Tile.FirstPlayer;
     /** Array that holds the players board state */
-    playerBoards: Array<PlayerBoard> = [];
+    playerBoards: Array<PlayerBoard>;
     /** List of moves available to current player */
     availableMoves: Array<Move> = [];
     /** List of moves played in this round */
@@ -47,12 +47,50 @@ export class GameState {
 
     /** Used to generate a random game */
     rng: seedrandom.PRNG = seedrandom();
+    seed: string;
 
     /**
      *
      * @param seed Seed the random number generator to play a specific game. Random otherwise
      */
-    constructor(public seed: string = Math.random().toString()) {}
+    constructor(gamestate?: GameState, move?: Move) {
+        if (gamestate !== undefined && move !== undefined) {
+            this.factory = new Array(gamestate.factory.length) as Tile[][];
+            for (let i = 0; i < gamestate.factory.length; i++) {
+                if (i == move.factory || i == 0) {
+                    this.factory[i] = gamestate.factory[i].slice(0);
+                } else {
+                    this.factory[i] = gamestate.factory[i];
+                }
+            }
+
+            this.playerBoards = new Array(gamestate.playerBoards.length) as PlayerBoard[];
+            for (let i = 0; i < this.playerBoards.length; i++) {
+                if (i == gamestate.activePlayer) {
+                    this.playerBoards[i] = new PlayerBoard(i, gamestate.playerBoards[i], move);
+                } else {
+                    this.playerBoards[i] = gamestate.playerBoards[i];
+                }
+            }
+
+            // gs.availableMoves = this.availableMoves.slice(0)
+            // gs.playedMoves = this.playedMoves;
+
+            this.nPlayers = gamestate.nPlayers;
+            this.firstTile = gamestate.firstTile;
+            this.round = gamestate.round;
+            this.turn = gamestate.turn;
+            this.activePlayer = gamestate.activePlayer;
+            this.startingPlayer = gamestate.startingPlayer;
+            this.previousPlayer = gamestate.previousPlayer;
+            this.state = gamestate.state;
+            this.seed = gamestate.seed;
+        } else {
+            this.factory = [];
+            this.playerBoards = [];
+            this.seed = Math.random().toString();
+        }
+    }
 
     /**
      * Starts a new game, new round, ready for first turn
@@ -105,6 +143,7 @@ export class GameState {
                 }
             }
         });
+        this.tilebag = this.tilebag.filter((tile) => tile != Tile.Null);
         // set players turn
         // this.activePlayer = (this.round + this.startingPlayer) % this.nPlayers;
         // this.previousPlayer = (this.round + this.startingPlayer - 1) % this.nPlayers;
@@ -140,7 +179,7 @@ export class GameState {
         // get list of moves
         this.getMoves();
 
-        // if no moves left, finish rund
+        // if no moves left, finish round
         if (this.availableMoves.length == 0) {
             // set activeplayer and turn back to previous
             // this.turn--;
@@ -185,6 +224,8 @@ export class GameState {
                 }
             });
             pb.floor = [];
+            pb.roundScore = 0;
+            pb.bonusScore = 0;
         });
 
         // check for end condition, otherwise next round
@@ -228,35 +269,63 @@ export class GameState {
         // Clear list of possible moves
         this.availableMoves = [];
         // Go through all the factories
-        this.factory.forEach((factory, factoryid) => {
+        for (let factoryid = 0; factoryid < this.factory.length; factoryid++) {
             // for each tile available in factory
-            const uniquetiles = new Set(factory);
-            uniquetiles.forEach((tile) => {
+            const counts = [0, 0, 0, 0, 0];
+            for (const tile of this.factory[factoryid]) {
+                counts[tile] += 1;
+            }
+            for (let tile = 0; tile < 5; tile++) {
+                if (!counts[tile]) {
+                    continue;
+                }
                 // for each of the lines on the players board
-                this.playerBoards[this.activePlayer].lines.forEach((line, lineNumber) => {
-                    // check if tile already in wall of this type
-                    if (this.playerBoards[this.activePlayer].wall[lineNumber].includes(tile)) {
+                for (let lineNumber = 0; lineNumber < 5; lineNumber++) {
+                    // check if tile already in wall of gs type
+                    const line = this.playerBoards[this.activePlayer].lines[lineNumber];
+                    if (
+                        this.playerBoards[this.activePlayer].wall[lineNumber][
+                            PlayerBoard.wallLocations[lineNumber][tile]
+                        ] != Tile.Null
+                    ) {
                         // not a valid move
                         // Check if tile/s already in line
                     } else if (line.length > 0) {
                         // check if possible move tile matches current line
-                        if (line.length < lineNumber + 1 && line[0] == tile) {
+                        const space = lineNumber + 1 - line.length;
+                        if (space && line[0] == tile) {
                             // is a valid move, add to list
                             this.availableMoves.push(
-                                new Move(this.activePlayer, factoryid, tile, lineNumber),
+                                new Move(
+                                    this.activePlayer,
+                                    factoryid,
+                                    tile,
+                                    lineNumber,
+                                    counts[tile],
+                                    space <= counts[tile],
+                                ),
                             );
                         }
                     } else {
                         // No tiles in line, valid move
                         this.availableMoves.push(
-                            new Move(this.activePlayer, factoryid, tile, lineNumber),
+                            new Move(
+                                this.activePlayer,
+                                factoryid,
+                                tile,
+                                lineNumber,
+                                counts[tile],
+                                counts[tile] >= lineNumber + 1,
+                            ),
                         );
                     }
-                });
+                }
                 // also add a move straight to the floor
-                this.availableMoves.push(new Move(this.activePlayer, factoryid, tile, 5));
-            });
-        });
+                this.availableMoves.push(
+                    new Move(this.activePlayer, factoryid, tile, 5, counts[tile]),
+                );
+            }
+        }
     }
 
     /**
@@ -264,14 +333,14 @@ export class GameState {
      *  Spare tiles may go to centre factory.
      * @param move Valid move from {@link GameState.availableMoves} that is applied to the game
      */
-    playMove(move: Move): void {
+    playMove(move: Move): number {
         if (this.state != State.turn || this.activePlayer != move.player) {
             throw Error("Invalid state for this move");
         }
+        let score = 0;
         this.playedMoves.push(move);
         const pb = this.playerBoards[move.player];
         // get the tiles from the factory
-        const tiles = this.factory[move.factory].filter((tile) => tile == move.tile);
         const discardtiles = this.factory[move.factory].filter((tile) => tile != move.tile);
 
         // if centre, set new tilelist
@@ -280,6 +349,7 @@ export class GameState {
             // add firstplayer tile if required.
             if (this.firstTile == Tile.FirstPlayer) {
                 pb.floor.push(Tile.FirstPlayer);
+                score -= 1;
                 this.firstTile = Tile.Null;
             }
         } else {
@@ -292,22 +362,43 @@ export class GameState {
         }
 
         // add each of the picked up tiles to players board
-        tiles.forEach((tile) => {
-            // check if straight to floor
-            if (move.line == 5) {
-                pb.floor.push(tile);
-            } else {
+        if (move.line != 5) {
+            for (let i = 0; i < move.count; i++) {
                 const length = pb.lines[move.line].length;
-                // check if space to append and corret type
-                if (length == 0 || (length < move.line + 1 && pb.lines[move.line][0] == tile)) {
-                    pb.lines[move.line].push(tile);
+                if (length <= move.line) {
+                    pb.lines[move.line].push(move.tile);
                 } else {
-                    pb.floor.push(tile);
+                    pb.floor.push(move.tile);
+                    if (pb.floor.length < 8) {
+                        score += PlayerBoard.floorScores[pb.floor.length - 1];
+                    }
                 }
             }
-        });
+        } else {
+            for (let i = 0; i < move.count; i++) {
+                pb.floor.push(move.tile);
+                if (pb.floor.length < 8) {
+                    score += PlayerBoard.floorScores[pb.floor.length - 1];
+                }
+            }
+        }
 
+        // Play shadow wall move if line is full
+        if (move.full) {
+            // Clear played tiles on shadow wall
+            for (let row = 0; row < 5; row++) {
+                if (pb.lines[row].length == row + 1) {
+                    // clear shadow tile
+                    const col = PlayerBoard.wallLocations[row][pb.lines[row][0]];
+                    pb.shadowWall[row][col] = Tile.Null;
+                }
+            }
+            score = moveToWall(pb, pb.shadowWall) - pb.roundScore;
+            pb.bonusScore = wallScore(pb.shadowWall);
+        }
+        pb.roundScore += score;
         this.state = State.turnEnd;
+        return score;
     }
 
     /**
@@ -395,6 +486,48 @@ export class GameState {
                 return pb;
             }
         });
+        // gs.availableMoves = this.availableMoves.slice(0)
+        // gs.playedMoves = this.playedMoves;
+
+        gs.nPlayers = this.nPlayers;
+        gs.firstTile = this.firstTile;
+        gs.round = this.round;
+        gs.turn = this.turn;
+        gs.activePlayer = this.activePlayer;
+        gs.startingPlayer = this.startingPlayer;
+        gs.previousPlayer = this.previousPlayer;
+        gs.state = this.state;
+        // gs.seed = this.seed;
+        return gs;
+    }
+
+    /**
+     * Creates a new gamestate, cloning the minimum possible properties from this
+     * @param move Move about to played to cloned gamestate
+     * @returns a cloned gamestate
+     */
+    tinyClone(move: Move): GameState {
+        const gs = new GameState();
+
+        // gs.tilebag = this.tilebag;
+        gs.factory = new Array(this.factory.length) as Tile[][];
+        for (let i = 0; i < this.factory.length; i++) {
+            if (i == move.factory || i == 0) {
+                gs.factory[i] = this.factory[i].slice(0);
+            } else {
+                gs.factory[i] = this.factory[i];
+            }
+        }
+
+        gs.playerBoards = new Array(this.playerBoards.length) as PlayerBoard[];
+        for (let i = 0; i < this.playerBoards.length; i++) {
+            if (i == this.activePlayer) {
+                gs.playerBoards[i] = this.playerBoards[i].tinyClone(move);
+            } else {
+                gs.playerBoards[i] = this.playerBoards[i];
+            }
+        }
+
         // gs.availableMoves = this.availableMoves.slice(0)
         // gs.playedMoves = this.playedMoves;
 
