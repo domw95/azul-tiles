@@ -1,6 +1,6 @@
 import { PruningType, SearchMethod } from "minimaxer";
 import { PlayerCompare } from "../dist/ai/gameperf.js";
-import { AI, AIOpts } from "../dist/ai/players.js";
+import { AI, AIOpts } from "../dist/ai/ai.js";
 
 const opts0 = new AIOpts();
 opts0.timeout = 100;

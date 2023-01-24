@@ -1,20 +1,25 @@
-import { PruningType, SearchMethod } from "minimaxer";
+import { SearchMethod } from "minimaxer";
 import { PlayerCompare } from "../dist/ai/gameperf.js";
-import { AI, AIOpts, CloneMethod, EvalMethod } from "../dist/ai/players.js";
+import { AI, AIOpts } from "../dist/ai/ai.js";
+
+const timeout = 100;
+
 let opts = new AIOpts();
-opts.timeout = 100;
+opts.timeout = timeout;
 opts.method = SearchMethod.TIME;
-opts.clone = CloneMethod.STANDARD;
-opts.genBased = true;
-opts.presort = true;
-opts.eval = EvalMethod.STANDARD;
-opts.pruning = PruningType.ALPHA_BETA;
+opts.optimal = true;
+opts.config.centre = 0.1;
 
 const player0 = new AI(0, opts);
 
-opts = structuredClone(opts);
-// opts.eval = EvalMethod.GENERAL;
-opts.clone = CloneMethod.SMART;
+opts = new AIOpts();
+opts.timeout = timeout;
+opts.method = SearchMethod.TIME;
+opts.optimal = true;
+opts.config.firstTileValue = 1;
+// opts.config.tileCountValue = 0.1;
+// opts.config.lineValue = 0.1;
+opts.config.centre = 0.1;
 
 const player1 = new AI(1, opts);
 
