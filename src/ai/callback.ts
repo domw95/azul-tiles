@@ -71,15 +71,9 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
             moves = gamestate.availableMoves;
         }
     }
-    const child: minimax.Node<GameState, Move, NodeData> = new minimax.Node(
-        type,
-        gamestate,
-        move,
-        undefined,
-        moves,
-    );
 
-    child.data = data;
+    // Create child, Assign value to child and return
+    const child = new minimax.Node(type, gamestate, move, data, undefined, moves);
     child.value = value;
     return child;
 };
