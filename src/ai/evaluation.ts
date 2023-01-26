@@ -1,6 +1,6 @@
 // A bunch of different function to evaluate a game state
 import { Move, Tile } from "../azul.js";
-import { PlayerBoard } from "../playerboard.js";
+import { PlayerBoard, wallScore } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /**
@@ -51,7 +51,7 @@ export function evaluate(
 }
 
 function currentScore(pb: PlayerBoard) {
-    return Math.max(0, pb.score + pb.roundScore + pb.bonusScore);
+    return Math.max(0, pb.score + pb.roundScore + wallScore(pb.shadowWall));
 }
 
 const CENTRE_WEIGHTS = [
