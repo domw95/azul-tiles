@@ -1,6 +1,6 @@
 {
     "name": "azul-tiles",
-    "version": "3.1.1",
+    "version": "3.1.2",
     "description": "Implements the board game Azul",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
