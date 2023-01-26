@@ -46,7 +46,7 @@ export class GameState {
     state: State = State.start;
 
     /** Used to generate a random game */
-    rng: seedrandom.PRNG = seedrandom();
+    rng: seedrandom.PRNG;
     seed: string;
 
     /**
@@ -85,10 +85,12 @@ export class GameState {
             this.previousPlayer = gamestate.previousPlayer;
             this.state = gamestate.state;
             this.seed = gamestate.seed;
+            this.rng = gamestate.rng;
         } else {
             this.factory = [];
             this.playerBoards = [];
             this.seed = Math.random().toString();
+            this.rng = seedrandom();
         }
     }
 
