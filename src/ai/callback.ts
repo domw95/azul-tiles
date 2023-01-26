@@ -64,16 +64,16 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
     }
 
     // Filter out straight to floor moves if in config
-    let moves = gamestate.availableMoves;
-    if (data?.config.movePruning && gamestate.turn < 4 && gamestate.round < 4) {
-        moves = moves.filter((move) => move.line != 5);
-        if (moves.length == 0) {
-            moves = gamestate.availableMoves;
-        }
-    }
 
     // Create child, Assign value to child and return
-    const child = new minimax.Node(type, gamestate, move, data, undefined, moves);
+    const child = new minimax.Node(
+        type,
+        gamestate,
+        move,
+        data,
+        undefined,
+        moveFilter(gamestate, data.config),
+    );
     child.value = value;
     return child;
 };
@@ -99,4 +99,15 @@ export class NodeData {
             this.values = [0, 0];
         }
     }
+}
+
+export function moveFilter(gamestate: GameState, config: EvalConfig): Move[] {
+    let moves = gamestate.availableMoves;
+    if (config.movePruning && gamestate.turn < 4 && gamestate.round < 4) {
+        moves = moves.filter((move) => move.line != 5);
+        if (moves.length == 0) {
+            moves = gamestate.availableMoves;
+        }
+    }
+    return moves;
 }

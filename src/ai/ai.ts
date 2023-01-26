@@ -1,7 +1,7 @@
 import * as minimax from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
 import { GameState } from "../state.js";
-import { generalCallback, NodeData } from "./callback.js";
+import { generalCallback, moveFilter, NodeData } from "./callback.js";
 import { EvalConfig } from "./evaluation.js";
 
 function printResult(result: minimax.NegamaxResult<Move>): void {
@@ -79,7 +79,7 @@ export class AI implements PlayerInterface {
             new Move(0, 0, 0, 0),
             new NodeData(),
             aim,
-            gamestate.availableMoves,
+            moveFilter(gamestate, this.opts.config),
         );
         // Set config on data
         root.data.config = this.opts.config;
