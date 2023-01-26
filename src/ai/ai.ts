@@ -71,14 +71,21 @@ export class AI implements PlayerInterface {
         if (this.id == 1) {
             aim = minimax.NodeAim.MIN;
         }
-        const tree: minimax.Negamax<GameState, Move, NodeData> = new minimax.Negamax(
+
+        // Create root node
+        const root = new minimax.Node(
+            minimax.NodeType.ROOT,
             gamestate.clone(),
+            new Move(0, 0, 0, 0),
+            new NodeData(),
             aim,
             gamestate.availableMoves,
-            this.opts,
         );
-        tree.root.data = new NodeData();
-        tree.root.data.config = this.opts.config;
+        // Set config on data
+        root.data.config = this.opts.config;
+        // Create tree
+        const tree = new minimax.Negamax(root, this.opts);
+        // Assign callback to tree
         tree.CreateChildNode = generalCallback;
 
         if (this.opts.print) {
@@ -86,7 +93,6 @@ export class AI implements PlayerInterface {
                 tree: minimax.Negamax<GameState, Move, NodeData>,
                 result: minimax.NegamaxResult<Move>,
             ): void => {
-                console.log("depth");
                 printResult(result);
             };
         }
