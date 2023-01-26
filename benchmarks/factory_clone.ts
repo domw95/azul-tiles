@@ -1,4 +1,4 @@
-import { add, complete, cycle, save, suite } from "benny";
+import { add, complete, cycle, suite } from "benny";
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 const factories: number[][] = new Array(6).fill(new Array(4).fill(Math.random()));
@@ -8,6 +8,7 @@ void suite(
     "Factory Clone",
 
     add("map", () => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const line_ind = Math.floor(Math.random() * 6);
         factories.map((line) => line.slice(0));
     }),
