@@ -11,6 +11,7 @@
         "tests",
         "examples",
         "performance",
-        "benchmarks"
+        "benchmarks",
+        "profiling"
     ]
 }
