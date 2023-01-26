@@ -225,7 +225,6 @@ export class GameState {
             });
             pb.floor = [];
             pb.roundScore = 0;
-            pb.bonusScore = 0;
         });
 
         // check for end condition, otherwise next round
