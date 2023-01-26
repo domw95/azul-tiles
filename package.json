@@ -12,6 +12,7 @@
         "build:examples": "npm run build && npx tsc -p examples/",
         "build:benchmarks": "npm run build && npx tsc -p benchmarks/",
         "build:performance": "npm run build && npx tsc -p performance/",
+        "build:profiling": "npm run build && npx tsc -p profiling/",
         "build:docs": "typedoc",
         "clean": "rm -rf performance/*.js && rm -rf examples/*.js && rm -rf benchmarks/*.js && rm -rf dist/*",
         "format": "prettier --write \"src/**/*.ts\"",
