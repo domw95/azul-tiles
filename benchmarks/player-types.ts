@@ -82,6 +82,16 @@ void suite(
         firstMove(opts);
     }),
 
+    add("AB Gen Presort Bubble Move Quick eval", () => {
+        const opts = new AIOpts();
+        opts.pruning = PruningType.ALPHA_BETA;
+        opts.genBased = true;
+        opts.presort = true;
+        opts.sortMethod = SortMethod.BUBBLE;
+        opts.config.quickEval = true;
+        firstMove(opts);
+    }),
+
     cycle(),
 
     complete(),
