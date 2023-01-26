@@ -7,4 +7,5 @@ node_modules
 /performance/**/*.js
 /performance/**/*.d.ts
 /coverage
+/profiling/**/*.js
 *.clinic
