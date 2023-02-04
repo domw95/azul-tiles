@@ -73,6 +73,7 @@ export class PlayerBoard {
             this.expectedScore = pb.expectedScore;
             this.turnUpdated = pb.turnUpdated;
             this.roundScore = pb.roundScore;
+            this.bonusScore = pb.bonusScore;
         } else {
             this.wall = [[], [], [], [], []];
             this.shadowWall = [[], [], [], [], []];
@@ -108,6 +109,7 @@ export class PlayerBoard {
         pb.expectedScore = this.expectedScore;
         pb.turnUpdated = this.turnUpdated;
         pb.roundScore = this.roundScore;
+        pb.bonusScore = this.bonusScore;
         return pb;
     }
 

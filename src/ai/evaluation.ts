@@ -51,7 +51,7 @@ export function evaluate(
 }
 
 function currentScore(pb: PlayerBoard) {
-    return Math.max(0, pb.score + pb.roundScore + wallScore(pb.shadowWall));
+    return Math.max(0, pb.score + pb.roundScore + pb.bonusScore);
 }
 
 const CENTRE_WEIGHTS = [

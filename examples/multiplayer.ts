@@ -1,4 +1,4 @@
-import { MultiAI, GameState, AIOpts, PruningType, SearchMethod } from "../dist/index.js";
+import { MultiAI, GameState, AIOpts, SearchMethod } from "../dist/index.js";
 
 const game = new GameState();
 
