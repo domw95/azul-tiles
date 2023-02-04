@@ -31,7 +31,7 @@ export function evaluate(
     config: EvalConfig,
 ) {
     let value = 0;
-    // First player value
+    // First player tile value
     if (gamestate.playerBoards[player].floor[0] == Tile.FirstPlayer && gamestate.round < 4) {
         value += config.firstTileValue;
     }
