@@ -58,12 +58,7 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
     }
 
     // Check child type
-    let type = minimax.NodeType.INNER;
-    if (!gamestate.nextTurn()) {
-        type = minimax.NodeType.LEAF;
-    }
-
-    // Filter out straight to floor moves if in config
+    const type = gamestate.nextTurn() ? minimax.NodeType.INNER : minimax.NodeType.LEAF;
 
     // Create child, Assign value to child and return
     const child = new minimax.Node(
@@ -75,6 +70,45 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
         moveFilter(gamestate, data.config),
     );
     child.value = value;
+    return child;
+};
+/**
+ * Callback function for multiplayer AI (3 or 4 players in game)
+ * @param parent Parent to clone and apply move to
+ * @param move move to play
+ * @returns child node
+ */
+export const multiplayerCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeData> = (
+    parent: minimax.Node<GameState, Move, NodeData>,
+    move: Move,
+): minimax.Node<GameState, Move, NodeData> => {
+    // Clone gamestate and play move
+    const gamestate = new GameState(parent.gamestate, move);
+    // const new_gamestate = parent.gamestate.smartClone(move);
+    gamestate.playMove(move);
+
+    // Perform evaluation
+    const scores = gamestate.playerBoards.map((pb, player) => {
+        return evaluate(gamestate, undefined, player, parent.data.config);
+    });
+
+    // Check child type
+    const type = gamestate.nextTurn() ? minimax.NodeType.INNER : minimax.NodeType.LEAF;
+
+    // Filter out straight to floor moves if in config
+
+    // Create child, Assign value to child and return
+    const child = new minimax.Node(
+        type,
+        gamestate,
+        move,
+        parent.data,
+        undefined,
+        moveFilter(gamestate, parent.data.config),
+    );
+
+    child.scores = scores;
+    child.activePlayer = gamestate.activePlayer;
     return child;
 };
 
