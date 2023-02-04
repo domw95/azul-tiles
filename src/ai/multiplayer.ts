@@ -1,6 +1,5 @@
 import * as mx from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
-import { PlayerBoard } from "../playerboard.js";
 import { GameState } from "../state.js";
 import { AIOpts, printResult } from "./ai.js";
 import { moveFilter, multiplayerCallback, NodeData } from "./callback.js";
