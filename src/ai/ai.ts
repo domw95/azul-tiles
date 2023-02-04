@@ -1,13 +1,13 @@
-import * as minimax from "minimaxer";
+import * as mx from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
 import { GameState } from "../state.js";
 import { generalCallback, moveFilter, NodeData } from "./callback.js";
 import { EvalConfig } from "./evaluation.js";
 
-function printResult(result: minimax.NegamaxResult<Move>): void {
-    if (result.exit == minimax.SearchExit.TIME) {
+export function printResult(result: mx.NegamaxResult<Move>): void {
+    if (result.exit == mx.SearchExit.TIME) {
         console.log("Timeout");
-    } else if (result.exit == minimax.SearchExit.FULL_DEPTH) {
+    } else if (result.exit == mx.SearchExit.FULL_DEPTH) {
         console.log("Full depth");
     } else {
         console.log(result.move);
@@ -29,7 +29,7 @@ export const enum EvalMethod {
 }
 
 // Options for creating a Negamax player
-export class AIOpts extends minimax.NegamaxOpts {
+export class AIOpts extends mx.NegamaxOpts {
     /** If `true`, the tree is saved between moves and the root moved */
     traverse = false;
     /** If `true` prints lots of interesting info to console */
@@ -48,7 +48,7 @@ export class AI implements PlayerInterface {
     name = "";
 
     /** Hold the current game tree */
-    tree: minimax.Negamax<GameState, Move, unknown> | undefined;
+    tree: mx.Negamax<GameState, Move, unknown> | undefined;
 
     /**
      *
@@ -58,7 +58,7 @@ export class AI implements PlayerInterface {
     constructor(public id: number, public opts: AIOpts) {}
 
     /**
-     *  Function called when game requires the AI to picka  move
+     *  Function called when game requires the AI to picks  move
      * @param gamestate
      * @returns
      */
@@ -67,14 +67,11 @@ export class AI implements PlayerInterface {
             console.log(" ====== Player %d turn ======", this.id);
         }
         // Create a tree
-        let aim = minimax.NodeAim.MAX;
-        if (this.id == 1) {
-            aim = minimax.NodeAim.MIN;
-        }
+        const aim = this.id == 0 ? mx.NodeAim.MAX : mx.NodeAim.MIN;
 
         // Create root node
-        const root = new minimax.Node(
-            minimax.NodeType.ROOT,
+        const root = new mx.Node(
+            mx.NodeType.ROOT,
             gamestate.clone(),
             new Move(0, 0, 0, 0),
             new NodeData(),
@@ -84,14 +81,14 @@ export class AI implements PlayerInterface {
         // Set config on data
         root.data.config = this.opts.config;
         // Create tree
-        const tree = new minimax.Negamax(root, this.opts);
+        const tree = new mx.Negamax(root, this.opts);
         // Assign callback to tree
         tree.CreateChildNode = generalCallback;
 
         if (this.opts.print) {
             tree.depthCallback = (
-                tree: minimax.Negamax<GameState, Move, NodeData>,
-                result: minimax.NegamaxResult<Move>,
+                tree: mx.Negamax<GameState, Move, NodeData>,
+                result: mx.NegamaxResult<Move>,
             ): void => {
                 printResult(result);
             };
