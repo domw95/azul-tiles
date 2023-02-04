@@ -134,6 +134,11 @@ export class GameState {
         this.factory.forEach((factory, id) => {
             if (id != 0) {
                 for (let i = 0; i < 4; i++) {
+                    const remaining = this.tilebag.filter((tile) => tile != Tile.Null);
+                    if (remaining.length < 4) {
+                        remaining.forEach((tile) => factory.push(tile));
+                        break;
+                    }
                     const ind = Math.floor(this.rng() * this.tilebag.length);
                     if (this.tilebag[ind] != Tile.Null) {
                         factory.push(this.tilebag[ind]);
