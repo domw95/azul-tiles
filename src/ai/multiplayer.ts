@@ -1,6 +1,5 @@
 import * as mx from "minimaxer";
 import { Move, PlayerInterface, PlayerType } from "../azul.js";
-import { PlayerBoard } from "../playerboard.js";
 import { GameState } from "../state.js";
 import { AIOpts, printResult } from "./ai.js";
 import { moveFilter, multiplayerCallback, NodeData } from "./callback.js";
@@ -62,8 +61,7 @@ export class MultiAI implements PlayerInterface {
             console.log(result);
         }
         // Return move
-        const pb = tree.root.child?.gamestate.playerBoards[this.id] as PlayerBoard;
-        console.log("Score", pb.score, "Round", pb.roundScore, "Bonus", pb.bonusScore);
+        // const pb = tree.root.child?.gamestate.playerBoards[this.id] as PlayerBoard;
         return result.move;
     }
 

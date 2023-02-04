@@ -29,7 +29,7 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
 
     // Updated values than need updating
     for (let player = 0; player < 2; player++) {
-        if (!data.config.quickEval || !data.updated[player] || activePlayer == player) {
+        if (activePlayer == player || !data.updated[player] || !data.config.quickEval) {
             data.values[player] = evaluate(gamestate, undefined, player, data.config);
             data.updated[player] = true;
         }
@@ -74,7 +74,7 @@ export const multiplayerCallback: minimax.CreateChildNodeFunc<GameState, Move, N
     // Perform evaluation
     // Updated values than need updating
     for (let player = 0; player < data.nplayers; player++) {
-        if (!data.config.quickEval || !data.updated[player] || activePlayer == player) {
+        if (activePlayer == player || !data.updated[player] || !data.config.quickEval) {
             data.values[player] = evaluate(gamestate, undefined, player, data.config);
             data.updated[player] = true;
         }

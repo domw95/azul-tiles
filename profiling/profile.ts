@@ -15,6 +15,7 @@ opts.genBased = true;
 const player = new AI(0, opts);
 
 const move = player.getMove(game);
+console.log(move);
 
 // for (let i = 0; ; i++) {
 //     player.id = i % 2;

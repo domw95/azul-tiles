@@ -1,6 +1,6 @@
 // A bunch of different function to evaluate a game state
 import { Move, Tile } from "../azul.js";
-import { PlayerBoard, wallScore } from "../playerboard.js";
+import { PlayerBoard } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /**
