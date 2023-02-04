@@ -32,7 +32,7 @@ export class MultiAI implements PlayerInterface {
             mx.NodeType.ROOT,
             gamestate.clone(),
             new Move(0, 0, 0, 0),
-            new NodeData(),
+            new NodeData(gamestate.nPlayers),
             undefined,
             moveFilter(gamestate, this.opts.config),
         );

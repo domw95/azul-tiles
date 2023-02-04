@@ -94,8 +94,8 @@ test("Player prediction", () => {
                 minimums = [];
                 break;
             } else {
-                // console.log("min", minimums);
-                // console.log("max", maximums);
+                console.log("min", minimums);
+                console.log("max", maximums);
                 const scores = gs.playerBoards.map((pb) => {
                     return pb.score + pb.bonusScore;
                 });
