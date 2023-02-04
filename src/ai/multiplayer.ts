@@ -63,7 +63,6 @@ export class MultiAI implements PlayerInterface {
         }
         // Return move
         const pb = tree.root.child?.gamestate.playerBoards[this.id] as PlayerBoard;
-        console.log("Score", pb.score, "Round", pb.roundScore, "Bonus", pb.bonusScore);
         return result.move;
     }
 

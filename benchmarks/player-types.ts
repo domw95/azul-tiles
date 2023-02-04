@@ -25,7 +25,7 @@ function firstMove(opts: AIOpts): void {
     opts.depth = 2;
     opts.method = SearchMethod.DEEPENING;
 
-    const player = new AI(1, opts);
+    const player = new AI(0, opts);
     player.getMove(game);
 }
 
@@ -79,6 +79,12 @@ void suite(
     add("Optimal", () => {
         const opts = new AIOpts();
         opts.optimal = true;
+        firstMove(opts);
+    }),
+    add("Optimal Quick eval", () => {
+        const opts = new AIOpts();
+        opts.optimal = true;
+        opts.config.quickEval = true;
         firstMove(opts);
     }),
 
