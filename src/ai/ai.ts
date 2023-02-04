@@ -48,7 +48,10 @@ export class AI implements PlayerInterface {
     name = "";
 
     /** Hold the current game tree */
-    tree: mx.Negamax<GameState, Move, unknown> | undefined;
+    tree: mx.Negamax<GameState, Move, NodeData> | undefined;
+
+    /** Hold the latest result */
+    result: mx.NegamaxResult<Move> | undefined;
 
     /**
      *
@@ -101,7 +104,8 @@ export class AI implements PlayerInterface {
             console.log(result);
         }
         // Return move
-
+        this.tree = tree;
+        this.result = result;
         return result.move;
     }
 
