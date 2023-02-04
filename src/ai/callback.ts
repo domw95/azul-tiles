@@ -24,36 +24,14 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
     // Get active player
     const activePlayer = parent.gamestate.activePlayer;
 
-    // Perform evaluation
-    let data = parent.data;
-    let value = 0;
-    // Check if quick eval on
-    if (parent.data?.config.quickEval) {
-        // Clone node data
-        data = new NodeData(parent.data);
-        // get opponent player
-        const opponent = activePlayer ^ 1;
+    // Clone node data
+    const data = new NodeData(parent.data.nplayers, parent.data);
 
-        // Update opponent if required
-        if (!data.updated) {
-            data.values[opponent] = evaluate(gamestate, undefined, opponent, data.config);
-            data.updated = true;
-        }
-        // Update active player
-        data.values[activePlayer] = evaluate(gamestate, move, activePlayer, data.config);
-        value = data.values[0] - data.values[1];
-    } else if (data != undefined) {
-        // Evaluate both players
-        // get previous move
-        const prev_move = gamestate.playedMoves.at(-1);
-        if (activePlayer == 0) {
-            value =
-                evaluate(gamestate, move, 0, data?.config) -
-                evaluate(gamestate, prev_move, 1, data?.config);
-        } else {
-            value =
-                evaluate(gamestate, prev_move, 0, data?.config) -
-                evaluate(gamestate, move, 1, data?.config);
+    // Updated values than need updating
+    for (let player = 0; player < 2; player++) {
+        if (!data.config.quickEval || !data.updated[player] || activePlayer == player) {
+            data.values[player] = evaluate(gamestate, undefined, player, data.config);
+            data.updated[player] = true;
         }
     }
 
@@ -69,7 +47,7 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
         undefined,
         moveFilter(gamestate, data.config),
     );
-    child.value = value;
+    child.value = data.values[0] - data.values[1];
     return child;
 };
 /**
@@ -87,10 +65,20 @@ export const multiplayerCallback: minimax.CreateChildNodeFunc<GameState, Move, N
     // const new_gamestate = parent.gamestate.smartClone(move);
     gamestate.playMove(move);
 
+    // Get active player
+    const activePlayer = parent.gamestate.activePlayer;
+
+    // Clone node data
+    const data = new NodeData(parent.data.nplayers, parent.data);
+
     // Perform evaluation
-    const scores = gamestate.playerBoards.map((pb, player) => {
-        return evaluate(gamestate, undefined, player, parent.data.config);
-    });
+    // Updated values than need updating
+    for (let player = 0; player < data.nplayers; player++) {
+        if (!data.config.quickEval || !data.updated[player] || activePlayer == player) {
+            data.values[player] = evaluate(gamestate, undefined, player, data.config);
+            data.updated[player] = true;
+        }
+    }
 
     // Check child type
     const type = gamestate.nextTurn() ? minimax.NodeType.INNER : minimax.NodeType.LEAF;
@@ -107,7 +95,7 @@ export const multiplayerCallback: minimax.CreateChildNodeFunc<GameState, Move, N
         moveFilter(gamestate, parent.data.config),
     );
 
-    child.scores = scores;
+    child.scores = data.values;
     child.activePlayer = gamestate.activePlayer;
     return child;
 };
@@ -122,15 +110,16 @@ export class NodeData {
     /** Object with config related to evaluation of gamestate */
     config = new EvalConfig();
     /** `true` if the values array is up to date */
-    updated = false;
+    updated: boolean[] = [];
 
-    constructor(parent?: NodeData) {
+    constructor(public nplayers: number, parent?: NodeData) {
         if (parent !== undefined) {
             this.values = parent.values.slice(0);
             this.config = parent.config;
-            this.updated = parent.updated;
+            this.updated = parent.updated.slice(0);
         } else {
-            this.values = [0, 0];
+            this.values = new Array(nplayers).fill(0) as number[];
+            this.updated = new Array(nplayers).fill(false) as boolean[];
         }
     }
 }

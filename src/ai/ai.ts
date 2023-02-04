@@ -77,7 +77,7 @@ export class AI implements PlayerInterface {
             mx.NodeType.ROOT,
             gamestate.clone(),
             new Move(0, 0, 0, 0),
-            new NodeData(),
+            new NodeData(gamestate.nPlayers),
             aim,
             moveFilter(gamestate, this.opts.config),
         );
