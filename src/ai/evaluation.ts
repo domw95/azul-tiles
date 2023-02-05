@@ -1,6 +1,6 @@
 // A bunch of different function to evaluate a game state
 import { Move, Tile } from "../azul.js";
-import { placeOnWall, PlayerBoard, wallScore } from "../playerboard.js";
+import { placeOnWall, PlayerBoard } from "../playerboard.js";
 import { GameState } from "../state.js";
 
 /**
@@ -23,6 +23,8 @@ export class EvalConfig {
     friendly = false;
     /** Try to forecast score from non-empty lines */
     forecast = 0;
+    /** If `false`, cap score evaluation at 0, if `true` can be negative */
+    negativeScore = false;
 }
 
 /** Returns a value of the gamestate for the player based on config and just played move */
@@ -52,12 +54,14 @@ export function evaluate(
     if (config.forecast) {
         value += config.forecast * forecastEvaluation(gamestate, player);
     }
-    return currentScore(gamestate.playerBoards[player]) + value;
+    return currentScore(gamestate.playerBoards[player], config) + value;
 }
 
-function currentScore(pb: PlayerBoard) {
+function currentScore(pb: PlayerBoard, config: EvalConfig) {
     // return pb.score + pb.roundScore + pb.bonusScore;
-    return Math.max(0, pb.score + pb.roundScore + pb.bonusScore);
+    return config.negativeScore
+        ? pb.score + pb.roundScore + pb.bonusScore
+        : Math.max(0, pb.score + pb.roundScore + pb.bonusScore);
 }
 
 // Centre Based evaluation
