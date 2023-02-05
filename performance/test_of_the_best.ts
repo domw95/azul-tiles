@@ -8,7 +8,8 @@ let opts = new AIOpts();
 opts.timeout = timeout;
 opts.method = SearchMethod.TIME;
 opts.optimal = true;
-opts.config.centre = 0.1;
+// opts.config.centre = 0.1;
+opts.config.quickEval = true;
 
 const player0 = new AI(0, opts);
 
@@ -16,6 +17,7 @@ opts = new AIOpts();
 opts.timeout = timeout;
 opts.method = SearchMethod.TIME;
 opts.optimal = true;
+opts.config.forecast = 0.1;
 opts.config.quickEval = true;
 // opts.config.firstTileValue = 1;
 // opts.config.tileCountValue = 0.1;
