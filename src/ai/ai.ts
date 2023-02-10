@@ -83,6 +83,7 @@ export class AI implements PlayerInterface {
         );
         // Set config on data
         root.data.config = this.opts.config;
+        root.data.rootPlayer = this.id;
         // Create tree
         const tree = new mx.Negamax(root, this.opts);
         // Assign callback to tree

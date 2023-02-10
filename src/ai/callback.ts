@@ -47,7 +47,14 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
         undefined,
         moveFilter(gamestate, data.config),
     );
-    child.value = data.values[0] - data.values[1];
+
+    // Return player score if using friendly evaluation
+    if (data.config.friendly) {
+        child.value = data.rootPlayer ? -data.values[1] : data.values[0];
+    } else {
+        child.value = data.values[0] - data.values[1];
+    }
+
     return child;
 };
 /**
@@ -111,12 +118,15 @@ export class NodeData {
     config = new EvalConfig();
     /** `true` if the values array is up to date */
     updated: boolean[] = [];
+    /** Player that starts the search from root*/
+    rootPlayer = 0;
 
     constructor(public nplayers: number, parent?: NodeData) {
         if (parent !== undefined) {
             this.values = parent.values.slice(0);
             this.config = parent.config;
             this.updated = parent.updated.slice(0);
+            this.rootPlayer = parent.rootPlayer;
         } else {
             this.values = new Array(nplayers).fill(0) as number[];
             this.updated = new Array(nplayers).fill(false) as boolean[];
@@ -130,6 +140,18 @@ export function moveFilter(gamestate: GameState, config: EvalConfig): Move[] {
         moves = moves.filter((move) => move.line != 5);
         if (moves.length == 0) {
             moves = gamestate.availableMoves;
+        }
+    }
+    if (config.moveAllFill) {
+        const filtered = moves.filter((move) => move.full);
+        if (filtered.length) {
+            moves = filtered;
+        }
+    }
+    if (config.moveNoFloor) {
+        const filtered = moves.filter((move) => move.line != 5);
+        if (filtered.length) {
+            moves = filtered;
         }
     }
     return moves;
