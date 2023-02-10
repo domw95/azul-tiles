@@ -19,10 +19,15 @@ export class EvalConfig {
     lineValue = 0;
     /** Remove moves that go direct to floor in the early turns and rounds*/
     movePruning = false;
+    /** Remove all moves don't fill a line (unless none) */
+    moveAllFill = false;
+    /** Remove all straight to floor moves (unless none) */
+    moveNoFloor = false;
     /** Don't consider the opponents score when evaluating */
     friendly = false;
     /** Try to forecast score from non-empty lines */
     forecast = 0;
+    forecast2 = 0;
     /** If `false`, cap score evaluation at 0, if `true` can be negative */
     negativeScore = false;
 }
@@ -53,6 +58,8 @@ export function evaluate(
     // Forecasting evaluation
     if (config.forecast) {
         value += config.forecast * forecastEvaluation(gamestate, player);
+    } else if (config.forecast2) {
+        value += config.forecast2 * forecastEvaluationWeighted(gamestate, player);
     }
     return currentScore(gamestate.playerBoards[player], config) + value;
 }
@@ -103,6 +110,30 @@ function forecastEvaluation(gs: GameState, player: number): number {
         // If some tiles in line but not full
         if (missing && missing < length) {
             exp_score += (placeOnWall(pb.lines[i][0], i, wall) * round_weight) / (missing + 0.5);
+        }
+    }
+    return exp_score;
+}
+
+function forecastEvaluationWeighted(gs: GameState, player: number): number {
+    if (gs.round >= 4) {
+        return 0;
+    }
+    const round_weight = Math.pow(2, -gs.round);
+    const pb = gs.playerBoards[player];
+    const wall: Tile[][] = [[], [], [], [], []];
+    for (let i = 0; i < 5; i++) {
+        wall[i] = pb.shadowWall[i].slice(0);
+    }
+    let exp_score = 0;
+    // Get possible scores for almost full lines
+    for (let i = 1; i < 5; i++) {
+        const length = i + 1;
+        const missing = length - pb.lines[i].length;
+        // If some tiles in line but not full
+        if (missing && missing < length) {
+            exp_score +=
+                placeOnWall(pb.lines[i][0], i, wall) * round_weight * Math.pow(2, 1 - missing);
         }
     }
     return exp_score;
