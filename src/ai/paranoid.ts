@@ -42,14 +42,20 @@ export const paranoidCallback: mx.CreateChildNodeFunc<GameState, Move, NodeData>
     );
     child.activePlayer = gamestate.activePlayer;
 
-    // Value is the root player's lead over the best placed opponent
-    let best_opponent = -Infinity;
+    // Value is the root player's lead over whoever it is playing against: one chosen
+    // player if there is a target, otherwise whichever opponent is doing best
+    let best = -Infinity;
     for (let player = 0; player < data.nplayers; player++) {
-        if (player != data.rootPlayer && data.values[player] > best_opponent) {
-            best_opponent = data.values[player];
+        if (player != data.rootPlayer && data.values[player] > best) {
+            best = data.values[player];
         }
     }
-    child.value = data.values[data.rootPlayer] - best_opponent;
+    let opponent = best;
+    if (data.targetPlayer >= 0) {
+        // Mix the target in, so a partial weight keeps playing the field as well
+        opponent = (1 - data.targetWeight) * best + data.targetWeight * data.values[data.targetPlayer];
+    }
+    child.value = data.values[data.rootPlayer] - opponent;
 
     return child;
 };
@@ -65,6 +71,9 @@ export const paranoidCallback: mx.CreateChildNodeFunc<GameState, Move, NodeData>
  *
  * Set {@link AIOpts.pruning} to {@link mx.PruningType.ALPHA_BETA} to get the benefit;
  * {@link AIOpts.optimal} has no effect here, as it is a negamax only option.
+ *
+ * Passing a `target` narrows what it plays for: instead of its lead over the field it
+ * maximises its lead over that one player, which makes it hound them specifically.
  */
 export class ParanoidAI implements PlayerInterface {
     type = PlayerType.AI;
@@ -73,8 +82,13 @@ export class ParanoidAI implements PlayerInterface {
     /**
      * @param id Player index, must correspond with gamestate index
      * @param opts Configuration options
+     * @param target Player to play against, rather than whichever opponent is doing
+     * best. Set this to a human's index for a player that cares only about finishing
+     * above them, and is happy to let everyone else past in the process.
+     * @param targetWeight How much to play the target rather than the field, between `0`
+     * and `1`. A partial weight hounds the target while still playing a sound game.
      */
-    constructor(public id: number, public opts: AIOpts) {}
+    constructor(public id: number, public opts: AIOpts, public target = -1, public targetWeight = 1) {}
 
     /**
      * Function called when the game requires the AI to pick a move
@@ -89,6 +103,8 @@ export class ParanoidAI implements PlayerInterface {
         // Node data has to know which player the search is for
         const data = new NodeData(gamestate.nPlayers);
         data.rootPlayer = this.id;
+        data.targetPlayer = this.target == this.id ? -1 : this.target;
+        data.targetWeight = this.targetWeight;
         data.config = this.opts.config;
 
         // Create root node, which is always the maximising player

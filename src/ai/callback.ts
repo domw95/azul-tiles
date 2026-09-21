@@ -120,6 +120,16 @@ export class NodeData {
     updated: boolean[] = [];
     /** Player that starts the search from root*/
     rootPlayer = 0;
+    /**
+     * Player the search is trying to finish above, or `-1` to play against whichever
+     * opponent is doing best. Only used by {@link ParanoidAI}.
+     */
+    targetPlayer = -1;
+    /**
+     * How much of {@link NodeData.targetPlayer} to mix into the opponent score, between
+     * `0` for none and `1` for nothing but the target.
+     */
+    targetWeight = 1;
 
     constructor(public nplayers: number, parent?: NodeData) {
         if (parent !== undefined) {
@@ -127,6 +137,8 @@ export class NodeData {
             this.config = parent.config;
             this.updated = parent.updated.slice(0);
             this.rootPlayer = parent.rootPlayer;
+            this.targetPlayer = parent.targetPlayer;
+            this.targetWeight = parent.targetWeight;
         } else {
             this.values = new Array(nplayers).fill(0) as number[];
             this.updated = new Array(nplayers).fill(false) as boolean[];
