@@ -17,15 +17,15 @@ function firstMove(opts: AIOpts): void {
     game.nextTurn();
     game.playMove(game.availableMoves[Math.floor(Math.random() * game.availableMoves.length)]);
     game.nextTurn();
-    // game.playMove(game.availableMoves[Math.floor(Math.random() * game.availableMoves.length)]);
-    // game.nextTurn();
-    // game.playMove(game.availableMoves[Math.floor(Math.random() * game.availableMoves.length)]);
-    // game.nextTurn();
+    game.playMove(game.availableMoves[Math.floor(Math.random() * game.availableMoves.length)]);
+    game.nextTurn();
+    game.playMove(game.availableMoves[Math.floor(Math.random() * game.availableMoves.length)]);
+    game.nextTurn();
 
-    opts.depth = 3;
+    opts.depth = 4;
     opts.method = SearchMethod.DEEPENING;
 
-    const player = new AI(1, opts);
+    const player = new AI(0, opts);
     player.getMove(game);
 }
 
@@ -64,6 +64,22 @@ void suite(
     add("Optimal", () => {
         const opts = new AIOpts();
         opts.optimal = true;
+        firstMove(opts);
+    }),
+
+    add("Optimal Centre", () => {
+        const opts = new AIOpts();
+        opts.optimal = true;
+        opts.config.centre = 0.1;
+        opts.config.firstTileValue = 1.5;
+        firstMove(opts);
+    }),
+    add("Optimal Centre quick", () => {
+        const opts = new AIOpts();
+        opts.optimal = true;
+        opts.config.centre = 0.1;
+        opts.config.firstTileValue = 1.5;
+        opts.config.quickEval = true;
         firstMove(opts);
     }),
 

@@ -24,46 +24,19 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
     // Get active player
     const activePlayer = parent.gamestate.activePlayer;
 
-    // Perform evaluation
-    let data = parent.data;
-    let value = 0;
-    // Check if quick eval on
-    if (parent.data?.config.quickEval) {
-        // Clone node data
-        data = new NodeData(parent.data);
-        // get opponent player
-        const opponent = activePlayer ^ 1;
+    // Clone node data
+    const data = new NodeData(parent.data.nplayers, parent.data);
 
-        // Update opponent if required
-        if (!data.updated) {
-            data.values[opponent] = evaluate(gamestate, undefined, opponent, data.config);
-            data.updated = true;
-        }
-        // Update active player
-        data.values[activePlayer] = evaluate(gamestate, move, activePlayer, data.config);
-        value = data.values[0] - data.values[1];
-    } else if (data != undefined) {
-        // Evaluate both players
-        // get previous move
-        const prev_move = gamestate.playedMoves.at(-1);
-        if (activePlayer == 0) {
-            value =
-                evaluate(gamestate, move, 0, data?.config) -
-                evaluate(gamestate, prev_move, 1, data?.config);
-        } else {
-            value =
-                evaluate(gamestate, prev_move, 0, data?.config) -
-                evaluate(gamestate, move, 1, data?.config);
+    // Updated values than need updating
+    for (let player = 0; player < 2; player++) {
+        if (activePlayer == player || !data.updated[player] || !data.config.quickEval) {
+            data.values[player] = evaluate(gamestate, undefined, player, data.config);
+            data.updated[player] = true;
         }
     }
 
     // Check child type
-    let type = minimax.NodeType.INNER;
-    if (!gamestate.nextTurn()) {
-        type = minimax.NodeType.LEAF;
-    }
-
-    // Filter out straight to floor moves if in config
+    const type = gamestate.nextTurn() ? minimax.NodeType.INNER : minimax.NodeType.LEAF;
 
     // Create child, Assign value to child and return
     const child = new minimax.Node(
@@ -74,7 +47,63 @@ export const generalCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeD
         undefined,
         moveFilter(gamestate, data.config),
     );
-    child.value = value;
+
+    // Return player score if using friendly evaluation
+    if (data.config.friendly) {
+        child.value = data.rootPlayer ? -data.values[1] : data.values[0];
+    } else {
+        child.value = data.values[0] - data.values[1];
+    }
+
+    return child;
+};
+/**
+ * Callback function for multiplayer AI (3 or 4 players in game)
+ * @param parent Parent to clone and apply move to
+ * @param move move to play
+ * @returns child node
+ */
+export const multiplayerCallback: minimax.CreateChildNodeFunc<GameState, Move, NodeData> = (
+    parent: minimax.Node<GameState, Move, NodeData>,
+    move: Move,
+): minimax.Node<GameState, Move, NodeData> => {
+    // Clone gamestate and play move
+    const gamestate = new GameState(parent.gamestate, move);
+    // const new_gamestate = parent.gamestate.smartClone(move);
+    gamestate.playMove(move);
+
+    // Get active player
+    const activePlayer = parent.gamestate.activePlayer;
+
+    // Clone node data
+    const data = new NodeData(parent.data.nplayers, parent.data);
+
+    // Perform evaluation
+    // Updated values than need updating
+    for (let player = 0; player < data.nplayers; player++) {
+        if (activePlayer == player || !data.updated[player] || !data.config.quickEval) {
+            data.values[player] = evaluate(gamestate, undefined, player, data.config);
+            data.updated[player] = true;
+        }
+    }
+
+    // Check child type
+    const type = gamestate.nextTurn() ? minimax.NodeType.INNER : minimax.NodeType.LEAF;
+
+    // Filter out straight to floor moves if in config
+
+    // Create child, Assign value to child and return
+    const child = new minimax.Node(
+        type,
+        gamestate,
+        move,
+        parent.data,
+        undefined,
+        moveFilter(gamestate, parent.data.config),
+    );
+
+    child.scores = data.values;
+    child.activePlayer = gamestate.activePlayer;
     return child;
 };
 
@@ -88,15 +117,31 @@ export class NodeData {
     /** Object with config related to evaluation of gamestate */
     config = new EvalConfig();
     /** `true` if the values array is up to date */
-    updated = false;
+    updated: boolean[] = [];
+    /** Player that starts the search from root*/
+    rootPlayer = 0;
+    /**
+     * Player the search is trying to finish above, or `-1` to play against whichever
+     * opponent is doing best. Only used by {@link ParanoidAI}.
+     */
+    targetPlayer = -1;
+    /**
+     * How much of {@link NodeData.targetPlayer} to mix into the opponent score, between
+     * `0` for none and `1` for nothing but the target.
+     */
+    targetWeight = 1;
 
-    constructor(parent?: NodeData) {
+    constructor(public nplayers: number, parent?: NodeData) {
         if (parent !== undefined) {
             this.values = parent.values.slice(0);
             this.config = parent.config;
-            this.updated = parent.updated;
+            this.updated = parent.updated.slice(0);
+            this.rootPlayer = parent.rootPlayer;
+            this.targetPlayer = parent.targetPlayer;
+            this.targetWeight = parent.targetWeight;
         } else {
-            this.values = [0, 0];
+            this.values = new Array(nplayers).fill(0) as number[];
+            this.updated = new Array(nplayers).fill(false) as boolean[];
         }
     }
 }
@@ -107,6 +152,18 @@ export function moveFilter(gamestate: GameState, config: EvalConfig): Move[] {
         moves = moves.filter((move) => move.line != 5);
         if (moves.length == 0) {
             moves = gamestate.availableMoves;
+        }
+    }
+    if (config.moveAllFill) {
+        const filtered = moves.filter((move) => move.full);
+        if (filtered.length) {
+            moves = filtered;
+        }
+    }
+    if (config.moveNoFloor) {
+        const filtered = moves.filter((move) => move.line != 5);
+        if (filtered.length) {
+            moves = filtered;
         }
     }
     return moves;
