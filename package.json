@@ -17,7 +17,7 @@
         "clean": "rm -rf performance/*.js && rm -rf examples/*.js && rm -rf benchmarks/*.js && rm -rf dist/*",
         "format": "prettier --write \"src/**/*.ts\"",
         "lint": "eslint .",
-        "prepare": "npm run build",
+        "prepare": "tsc",
         "prepublishOnly": "npx git-branch-is -r release* && npm run lint && npm test",
         "preversion": "npx git-branch-is -r release* && npm run lint",
         "postversion": "git push && git push --tags"
